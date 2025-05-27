@@ -1,4 +1,6 @@
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/context/AuthContext";
 
 export default function RootLayout({
   children,
@@ -7,7 +9,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          <Toaster />
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
