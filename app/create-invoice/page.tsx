@@ -1,17 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-"use client"
+"use client";
 
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { invoiceSchema, InvoiceInput } from "@/lib/validation/invoice"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card } from "@/components/ui/card"
-import api from "@/lib/axios"
-import { useState } from "react"
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { invoiceSchema, InvoiceInput } from "@/lib/validation/invoice";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
+import api from "@/lib/axios";
+import { useState } from "react";
+
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import { InvoicePDF } from "@/components/invoice/InvoicePDF";
 
 export default function CreateInvoicePage() {
   const {
@@ -20,7 +29,7 @@ export default function CreateInvoicePage() {
     handleSubmit,
     watch,
     setValue,
-    formState: { }
+    formState: {},
   } = useForm<InvoiceInput>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
@@ -28,40 +37,45 @@ export default function CreateInvoicePage() {
       taxType: "CGST_SGST",
       invoiceDate: new Date().toISOString().split("T")[0],
       taxRate: 18,
-      items: [{ description: "", hsnCode: "", quantity: 1, rate: 0 }]
-    }
-  })
+      items: [{ description: "", hsnCode: "", quantity: 1, rate: 0 }],
+    },
+  });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "items"
-  })
+    name: "items",
+  });
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [submittedData, setSubmittedData] = useState<InvoiceInput | null>(null);
 
   const onSubmit = async (data: InvoiceInput) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      await api.post("/invoices", data)
-      alert("Invoice created!")
+      await api.post("/invoices", data);
+      setSubmittedData(data); // Store submitted data for PDF
+      alert("Invoice created!");
     } catch (err) {
-      console.error(err)
-      alert("Failed to create invoice")
+      console.error(err);
+      alert("Failed to create invoice");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Subtotal
-  const items = watch("items")
-  const taxType = watch("taxType")
-  const taxRate = watch("taxRate")
-  const subtotal = items.reduce((sum, item) => sum + item.quantity * item.rate, 0)
-  const cgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0
-  const sgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0
-  const igst = taxType === "IGST" ? (subtotal * taxRate) / 100 : 0
-  const total = subtotal + cgst + sgst + igst
-  const roundedTotal = Math.round(total)
+  const items = watch("items");
+  const taxType = watch("taxType");
+  const taxRate = watch("taxRate");
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.quantity * item.rate,
+    0
+  );
+  const cgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0;
+  const sgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0;
+  const igst = taxType === "IGST" ? (subtotal * taxRate) / 100 : 0;
+  const total = subtotal + cgst + sgst + igst;
+  const roundedTotal = Math.round(total);
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -72,8 +86,13 @@ export default function CreateInvoicePage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Invoice Type</Label>
-            <Select onValueChange={(val) => setValue("invoiceType", val as any)} defaultValue="TAX">
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              onValueChange={(val) => setValue("invoiceType", val as any)}
+              defaultValue="TAX"
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="TAX">Tax Invoice</SelectItem>
                 <SelectItem value="PROFORMA">Proforma Invoice</SelectItem>
@@ -83,8 +102,13 @@ export default function CreateInvoicePage() {
 
           <div>
             <Label>Tax Type</Label>
-            <Select onValueChange={(val) => setValue("taxType", val as any)} defaultValue="CGST_SGST">
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              onValueChange={(val) => setValue("taxType", val as any)}
+              defaultValue="CGST_SGST"
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="CGST_SGST">CGST + SGST</SelectItem>
                 <SelectItem value="IGST">IGST</SelectItem>
@@ -126,15 +150,46 @@ export default function CreateInvoicePage() {
         <Card className="p-4 mt-4">
           <h2 className="text-lg font-semibold mb-2">Items</h2>
           {fields.map((field, index) => (
-            <div key={field.id} className="grid grid-cols-5 gap-4 items-end mb-2">
-              <Input placeholder="Description" {...register(`items.${index}.description`)} />
-              <Input placeholder="HSN Code" {...register(`items.${index}.hsnCode`)} />
-              <Input type="number" placeholder="Qty" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
-              <Input type="number" placeholder="Rate" {...register(`items.${index}.rate`, { valueAsNumber: true })} />
-              <Button type="button" variant="destructive" onClick={() => remove(index)}>Delete</Button>
+            <div
+              key={field.id}
+              className="grid grid-cols-5 gap-4 items-end mb-2"
+            >
+              <Input
+                placeholder="Description"
+                {...register(`items.${index}.description`)}
+              />
+              <Input
+                placeholder="HSN Code"
+                {...register(`items.${index}.hsnCode`)}
+              />
+              <Input
+                type="number"
+                placeholder="Qty"
+                {...register(`items.${index}.quantity`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <Input
+                type="number"
+                placeholder="Rate"
+                {...register(`items.${index}.rate`, { valueAsNumber: true })}
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => remove(index)}
+              >
+                Delete
+              </Button>
             </div>
           ))}
-          <Button type="button" variant="outline" onClick={() => append({ description: "", hsnCode: "", quantity: 1, rate: 0 })}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              append({ description: "", hsnCode: "", quantity: 1, rate: 0 })
+            }
+          >
             + Add Item
           </Button>
         </Card>
@@ -156,6 +211,25 @@ export default function CreateInvoicePage() {
           {loading ? "Submitting..." : "Generate Invoice"}
         </Button>
       </form>
+
+      {submittedData && (
+        <div className="space-y-4 mt-6">
+          <PDFDownloadLink
+            document={<InvoicePDF data={submittedData} />}
+            fileName="invoice.pdf"
+            className="inline-block"
+          >
+            {({ loading }) =>
+              loading ? "Generating PDF..." : <Button>Download PDF</Button>
+            }
+          </PDFDownloadLink>
+          <div className="border h-[80vh]">
+            <PDFViewer style={{ width: "100%", height: "100%" }}>
+              <InvoicePDF data={submittedData} />
+            </PDFViewer>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
