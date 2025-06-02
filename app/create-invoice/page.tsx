@@ -67,6 +67,7 @@ export default function CreateInvoicePage() {
   const items = watch("items");
   const taxType = watch("taxType");
   const taxRate = watch("taxRate");
+  const invoiceType = watch("invoiceType");
   const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.rate,
     0
@@ -115,23 +116,68 @@ export default function CreateInvoicePage() {
               </SelectContent>
             </Select>
           </div>
+
+          <div>
+            <Label>Tax Rate (%)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              {...register("taxRate", { valueAsNumber: true })}
+            />
+          </div>
         </div>
 
         {/* Invoice Meta */}
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label>Date</Label>
-            <Input type="date" {...register("invoiceDate")} />
+        {invoiceType === "TAX" && (
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label>Invoice Number</Label>
+              <Input
+                type="number"
+                {...register("invoiceNumber", { valueAsNumber: true })}
+              />
+            </div>
+            <div>
+              <Label>PO Number</Label>
+              <Input {...register("poNumber")} />
+            </div>
+            <div>
+              <Label>Date</Label>
+              <Input type="date" {...register("invoiceDate")} />
+            </div>
+            <div>
+              <Label>Vehicle Number</Label>
+              <Input {...register("vehicleNumber")} />
+            </div>
+            <div>
+              <Label>Transporter</Label>
+              <Input {...register("transporter")} />
+            </div>
+            <div>
+              <Label>No. of Bundles</Label>
+              <Input
+                type="number"
+                {...register("bundleCount", { valueAsNumber: true })}
+              />
+            </div>
           </div>
-          <div>
-            <Label>PO Number</Label>
-            <Input {...register("poNumber")} />
+        )}
+
+        {invoiceType === "PROFORMA" && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Invoice Number</Label>
+              <Input
+                type="number"
+                {...register("invoiceNumber", { valueAsNumber: true })}
+              />
+            </div>
+            <div>
+              <Label>Date</Label>
+              <Input type="date" {...register("invoiceDate")} />
+            </div>
           </div>
-          <div>
-            <Label>Vehicle Number</Label>
-            <Input {...register("vehicleNumber")} />
-          </div>
-        </div>
+        )}
 
         {/* Client */}
         <Card className="p-4 mt-4">
@@ -144,6 +190,31 @@ export default function CreateInvoicePage() {
             <Input {...register("client.state")} placeholder="State" />
             <Input {...register("client.pincode")} placeholder="Pincode" />
           </div>
+
+          {invoiceType === "TAX" && (
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <Input
+                {...register("client.shippingName")}
+                placeholder="Shipping Name"
+              />
+              <Input
+                {...register("client.shippingAddress")}
+                placeholder="Shipping Address"
+              />
+              <Input
+                {...register("client.shippingCity")}
+                placeholder="Shipping City"
+              />
+              <Input
+                {...register("client.shippingState")}
+                placeholder="Shipping State"
+              />
+              <Input
+                {...register("client.shippingPincode")}
+                placeholder="Shipping Pincode"
+              />
+            </div>
+          )}
         </Card>
 
         {/* Item List */}

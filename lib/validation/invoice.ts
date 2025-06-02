@@ -1,6 +1,7 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const invoiceSchema = z.object({
+  invoiceNumber: z.number().min(1).optional(),
   invoiceType: z.enum(["TAX", "PROFORMA"]),
   taxType: z.enum(["CGST_SGST", "IGST"]),
   invoiceDate: z.string().min(1),
@@ -15,7 +16,12 @@ export const invoiceSchema = z.object({
     address: z.string(),
     city: z.string(),
     state: z.string(),
-    pincode: z.string()
+    pincode: z.string(),
+    shippingName: z.string().optional(),
+    shippingAddress: z.string().optional(),
+    shippingCity: z.string().optional(),
+    shippingState: z.string().optional(),
+    shippingPincode: z.string().optional(),
   }),
   items: z
     .array(
@@ -23,10 +29,10 @@ export const invoiceSchema = z.object({
         description: z.string().min(1),
         hsnCode: z.string(),
         quantity: z.number().min(1),
-        rate: z.number().min(0)
+        rate: z.number().min(0),
       })
     )
-    .min(1)
-})
+    .min(1),
+});
 
-export type InvoiceInput = z.infer<typeof invoiceSchema>
+export type InvoiceInput = z.infer<typeof invoiceSchema>;
