@@ -1,6 +1,13 @@
-import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer"
-import type { Invoice } from "@/lib/types/user"
-import { ToWords } from "to-words"
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from "@react-pdf/renderer";
+import type { Invoice } from "@/lib/types/user";
+import { ToWords } from "to-words";
 
 const styles = StyleSheet.create({
   page: {
@@ -129,11 +136,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
     textAlign: "right",
   },
-})
+});
 
 type Props = {
-  data: Invoice
-}
+  data: Invoice;
+};
 
 export const InvoicePDF = ({ data }: Props) => {
   const {
@@ -155,7 +162,7 @@ export const InvoicePDF = ({ data }: Props) => {
     total = 0,
     roundedTotal = 0,
     taxRate = 18,
-  } = data || {}
+  } = data || {};
 
   // Default values for missing data
   const defaultUser = {
@@ -178,7 +185,7 @@ export const InvoicePDF = ({ data }: Props) => {
       terms:
         "1. Payment terms: 30 days\n2. Interest @24% p.a. will be charged on delayed payments\n3. Subject to jurisdiction",
     },
-  }
+  };
 
   const defaultClient = {
     name: "Client Name",
@@ -192,23 +199,26 @@ export const InvoicePDF = ({ data }: Props) => {
     shippingCity: "",
     shippingState: "",
     shippingPincode: "",
-  }
+  };
 
-  const invoiceUser = { ...defaultUser, ...user }
-  const invoiceClient = { ...defaultClient, ...client }
-  const toWords = new ToWords()
+  const invoiceUser = { ...defaultUser, ...user };
+  const invoiceClient = { ...defaultClient, ...client };
+  const toWords = new ToWords();
 
   // Calculate individual item totals
   const itemsWithTotals = items.map((item) => {
-    const itemTotal = item.quantity * item.rate
-    const itemGst = taxType === "CGST_SGST" ? (itemTotal * taxRate) / 100 : (itemTotal * taxRate) / 100
+    const itemTotal = item.quantity * item.rate;
+    const itemGst =
+      taxType === "CGST_SGST"
+        ? (itemTotal * taxRate) / 100
+        : (itemTotal * taxRate) / 100;
     return {
       ...item,
       itemTotal,
       itemGst,
       finalAmount: itemTotal + itemGst,
-    }
-  })
+    };
+  });
 
   return (
     <Document>
@@ -216,11 +226,20 @@ export const InvoicePDF = ({ data }: Props) => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            {invoiceUser.logoUrl && <Image src={invoiceUser.logoUrl || "/placeholder.svg"} style={styles.logo} />}
+            {invoiceUser.logoUrl && (
+              <Image
+                src={invoiceUser.logoUrl || "/placeholder.svg"}
+                style={styles.logo}
+              />
+            )}
           </View>
           <View style={styles.headerRight}>
-            <Text style={styles.originalText}>Original/Duplicate/Triplicate</Text>
-            <Text style={styles.invoiceTitle}>{invoiceType === "TAX" ? "TAX INVOICE" : "PROFORMA INVOICE"}</Text>
+            <Text style={styles.originalText}>
+              Original/Duplicate/Triplicate
+            </Text>
+            <Text style={styles.invoiceTitle}>
+              {invoiceType === "TAX" ? "TAX INVOICE" : "PROFORMA INVOICE"}
+            </Text>
           </View>
         </View>
 
@@ -240,7 +259,9 @@ export const InvoicePDF = ({ data }: Props) => {
           </View>
           <View style={styles.rightColumn}>
             <Text>Invoice Number: {invoiceNumber}</Text>
-            <Text>Date: {new Date(invoiceDate).toLocaleDateString("en-IN")}</Text>
+            <Text>
+              Date: {new Date(invoiceDate).toLocaleDateString("en-IN")}
+            </Text>
             {invoiceType === "TAX" && (
               <>
                 <Text>PO NO: {poNumber || "-"}</Text>
@@ -259,22 +280,28 @@ export const InvoicePDF = ({ data }: Props) => {
             <Text>{invoiceClient.name}</Text>
             <Text>{invoiceClient.address}</Text>
             <Text>
-              {invoiceClient.city}, {invoiceClient.state} - {invoiceClient.pincode}
+              {invoiceClient.city}, {invoiceClient.state} -{" "}
+              {invoiceClient.pincode}
             </Text>
             <Text>Client GSTIN: {invoiceClient.gstin || "-"}</Text>
 
-            {invoiceType === "TAX" && (invoiceClient.shippingName || invoiceClient.shippingAddress) && (
-              <View style={{ marginTop: 10 }}>
-                <Text style={styles.bold}>Consignee - Ship To:</Text>
-                <Text>{invoiceClient.shippingName || invoiceClient.name}</Text>
-                <Text>{invoiceClient.shippingAddress || invoiceClient.address}</Text>
-                <Text>
-                  {invoiceClient.shippingCity || invoiceClient.city},{" "}
-                  {invoiceClient.shippingState || invoiceClient.state} -{" "}
-                  {invoiceClient.shippingPincode || invoiceClient.pincode}
-                </Text>
-              </View>
-            )}
+            {invoiceType === "TAX" &&
+              (invoiceClient.shippingName || invoiceClient.shippingAddress) && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={styles.bold}>Consignee - Ship To:</Text>
+                  <Text>
+                    {invoiceClient.shippingName || invoiceClient.name}
+                  </Text>
+                  <Text>
+                    {invoiceClient.shippingAddress || invoiceClient.address}
+                  </Text>
+                  <Text>
+                    {invoiceClient.shippingCity || invoiceClient.city},{" "}
+                    {invoiceClient.shippingState || invoiceClient.state} -{" "}
+                    {invoiceClient.shippingPincode || invoiceClient.pincode}
+                  </Text>
+                </View>
+              )}
           </View>
           <View style={styles.rightColumn}>
             <Text style={styles.bold}>Bank Details</Text>
@@ -290,10 +317,14 @@ export const InvoicePDF = ({ data }: Props) => {
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableCellHeader, { flex: 0.5 }]}>Sl. No.</Text>
-            <Text style={[styles.tableCellHeader, { flex: 3 }]}>Item Description</Text>
+            <Text style={[styles.tableCellHeader, { flex: 3 }]}>
+              Item Description
+            </Text>
             <Text style={[styles.tableCellHeader, { flex: 1 }]}>HSN Code</Text>
             <Text style={[styles.tableCellHeader, { flex: 1 }]}>Units</Text>
-            <Text style={[styles.tableCellHeader, { flex: 1 }]}>Basic Price</Text>
+            <Text style={[styles.tableCellHeader, { flex: 1 }]}>
+              Basic Price
+            </Text>
             <Text style={[styles.tableCellHeader, { flex: 1 }]}>GST</Text>
             <Text style={[styles.tableCellHeader, { flex: 1 }]}>Amount</Text>
           </View>
@@ -302,12 +333,24 @@ export const InvoicePDF = ({ data }: Props) => {
             ? itemsWithTotals.map((item, i) => (
                 <View style={styles.tableRow} key={i}>
                   <Text style={[styles.tableCell, { flex: 0.5 }]}>{i + 1}</Text>
-                  <Text style={[styles.tableCellLeft, { flex: 3 }]}>{item.description}</Text>
-                  <Text style={[styles.tableCell, { flex: 1 }]}>{item.hsnCode}</Text>
-                  <Text style={[styles.tableCell, { flex: 1 }]}>{item.quantity}</Text>
-                  <Text style={[styles.tableCell, { flex: 1 }]}>₹{item.rate.toFixed(2)}</Text>
-                  <Text style={[styles.tableCell, { flex: 1 }]}>₹{item.itemGst.toFixed(2)}</Text>
-                  <Text style={[styles.tableCell, { flex: 1 }]}>₹{item.finalAmount.toFixed(2)}</Text>
+                  <Text style={[styles.tableCellLeft, { flex: 3 }]}>
+                    {item.description}
+                  </Text>
+                  <Text style={[styles.tableCell, { flex: 1 }]}>
+                    {item.hsnCode}
+                  </Text>
+                  <Text style={[styles.tableCell, { flex: 1 }]}>
+                    {item.quantity}
+                  </Text>
+                  <Text style={[styles.tableCell, { flex: 1 }]}>
+                    {item.rate.toFixed(2)}
+                  </Text>
+                  <Text style={[styles.tableCell, { flex: 1 }]}>
+                    {item.itemGst.toFixed(2)}
+                  </Text>
+                  <Text style={[styles.tableCell, { flex: 1 }]}>
+                    {item.finalAmount.toFixed(2)}
+                  </Text>
                 </View>
               ))
             : // Empty rows for better presentation
@@ -339,35 +382,44 @@ export const InvoicePDF = ({ data }: Props) => {
           <View style={styles.totalsRight}>
             <View style={styles.totalRow}>
               <Text>Taxable Amt:</Text>
-              <Text>₹{subtotal.toFixed(2)}</Text>
+              <Text>{subtotal.toFixed(2)}</Text>
             </View>
 
             {taxType === "CGST_SGST" ? (
               <>
                 <View style={styles.totalRow}>
                   <Text>CGST @ {(taxRate / 2).toFixed(1)}%:</Text>
-                  <Text>₹{cgst.toFixed(2)}</Text>
+                  <Text>{cgst.toFixed(2)}</Text>
                 </View>
                 <View style={styles.totalRow}>
                   <Text>SGST @ {(taxRate / 2).toFixed(1)}%:</Text>
-                  <Text>₹{sgst.toFixed(2)}</Text>
+                  <Text>{sgst.toFixed(2)}</Text>
                 </View>
               </>
             ) : (
               <View style={styles.totalRow}>
                 <Text>IGST @ {taxRate.toFixed(1)}%:</Text>
-                <Text>₹{igst.toFixed(2)}</Text>
+                <Text>{igst.toFixed(2)}</Text>
               </View>
             )}
 
-            <View style={[styles.totalRow, { borderTop: "1px solid #000", paddingTop: 3, fontWeight: "bold" }]}>
+            <View
+              style={[
+                styles.totalRow,
+                {
+                  borderTop: "1px solid #000",
+                  paddingTop: 3,
+                  fontWeight: "bold",
+                },
+              ]}
+            >
               <Text>Total:</Text>
-              <Text>₹{total.toFixed(2)}</Text>
+              <Text>{total.toFixed(2)}</Text>
             </View>
 
             <View style={[styles.totalRow, { fontWeight: "bold" }]}>
               <Text>Rounded Off:</Text>
-              <Text>₹{roundedTotal}</Text>
+              <Text>{roundedTotal}</Text>
             </View>
           </View>
         </View>
@@ -387,5 +439,5 @@ export const InvoicePDF = ({ data }: Props) => {
         </View>
       </Page>
     </Document>
-  )
-}
+  );
+};
