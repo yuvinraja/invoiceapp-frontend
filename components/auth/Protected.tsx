@@ -12,7 +12,7 @@ export default function Protected({ children }: { children: React.ReactNode }) {
     if (!loading && !user) {
       router.push("/login")
     }
-  }, [loading, user])
+  }, [loading, user, router])
 
   if (loading || !user) return <div className="p-4">Loading...</div>
 

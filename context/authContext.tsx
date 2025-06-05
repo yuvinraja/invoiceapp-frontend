@@ -8,6 +8,9 @@ import { User } from "../lib/types/user";
 type AuthContextType = {
   user: User | null;
   loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
 
@@ -28,12 +31,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const login = async (email: string, password: string) => {
+    const response = await api.post("/auth/login", { email, password });
+    setUser(response.data.user);
+  };
+
+  const signup = async (email: string, password: string) => {
+    const response = await api.post("/auth/signup", { email, password });
+    setUser(response.data.user);
+  };
+
+  const logout = async () => {
+    await api.post("/auth/logout");
+    setUser(null);
+  };
+
   useEffect(() => {
     refreshUser();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, refreshUser, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
