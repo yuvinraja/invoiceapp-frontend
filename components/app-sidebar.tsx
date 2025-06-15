@@ -1,12 +1,6 @@
-"use client";
+"use client"
 
-import {
-  LayoutDashboard,
-  FileText,
-  Settings,
-  LogOut,
-  Building2,
-} from "lucide-react";
+import { LayoutDashboard, FileText, Settings, LogOut, Building2, Plus, User } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -18,68 +12,132 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+} from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/context/AuthContext"
+import { toast } from "sonner"
+import Link from "next/link"
 
-const menuItems = [
+const mainMenuItems = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
+    description: "Overview & analytics",
   },
   {
     title: "Invoices",
     url: "/invoices",
     icon: FileText,
+    description: "Manage all invoices",
+  },
+  // {
+  //   title: "Analytics",
+  //   url: "/analytics",
+  //   icon: BarChart3,
+  //   description: "Reports & insights",
+  // },
+]
+
+const secondaryMenuItems = [
+  {
+    title: "Profile",
+    url: "/profile",
+    icon: User,
   },
   {
     title: "Settings",
     url: "/settings",
     icon: Settings,
   },
-];
+]
 
 export function AppSidebar() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth()
 
   const handleLogout = async () => {
     try {
-      await logout();
-      toast.success("Logged out successfully");
+      await logout()
+      toast.success("Logged out successfully")
     } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Failed to logout");
+      console.error("Logout error:", error)
+      toast.error("Failed to logout")
     }
-  };
+  }
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <Building2 className="h-6 w-6 text-blue-600" />
-          <div>
-            <p className="font-semibold text-sm">GST Invoice</p>
-            <p className="text-xs text-muted-foreground">
-              {user?.email}
-            </p>
+    <Sidebar className="border-r-2">
+      <SidebarHeader className="border-b-2 bg-muted/30">
+        <div className="flex items-center gap-3 px-2 py-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground">
+            <Building2 className="h-5 w-5 text-background" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-base truncate">InvoiceGST</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email || "user@example.com"}</p>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+      <SidebarContent className="px-2">
+        {/* Quick Actions */}
+        <SidebarGroup className="py-4">
+          <SidebarGroupContent>
+            <Button asChild className="w-full justify-start h-10">
+              <Link href="/invoices/create">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Invoice
+              </Link>
+            </Button>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <Separator />
+
+        {/* Main Navigation */}
+        <SidebarGroup className="py-4">
+          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Main Menu
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
+                  <SidebarMenuButton asChild className="h-12 px-3">
+                    <Link href={item.url} className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm">{item.title}</div>
+                        <div className="text-xs text-muted-foreground truncate">{item.description}</div>
+                      </div>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <Separator />
+
+        {/* Secondary Navigation */}
+        <SidebarGroup className="py-4">
+          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Account
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {secondaryMenuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild className="h-10 px-3">
+                    <Link href={item.url} className="flex items-center gap-3">
+                      <item.icon className="h-4 w-4" />
+                      <span className="text-sm">{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -88,20 +146,26 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t">
+      <SidebarFooter className="border-t-2 bg-muted/30 p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
+            <div className="px-2 py-3">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge variant="secondary" className="text-xs">
+                  Pro Plan
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  Active
+                </Badge>
+              </div>
+              <Button variant="outline" className="w-full justify-start h-10 bg-background" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

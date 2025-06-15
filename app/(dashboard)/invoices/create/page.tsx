@@ -104,7 +104,7 @@ export default function CreateInvoicePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="invoiceType">Invoice Type</Label>
-                <Select onValueChange={(val) => setValue("invoiceType", val as any)} defaultValue="TAX">
+                <Select onValueChange={(val: "TAX" | "PROFORMA") => setValue("invoiceType", val)} defaultValue="TAX">
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -117,7 +117,7 @@ export default function CreateInvoicePage() {
 
               <div>
                 <Label htmlFor="taxType">Tax Type</Label>
-                <Select onValueChange={(val) => setValue("taxType", val as any)} defaultValue="CGST_SGST">
+                <Select onValueChange={(val: "CGST_SGST" | "IGST") => setValue("taxType", val)} defaultValue="CGST_SGST">
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
