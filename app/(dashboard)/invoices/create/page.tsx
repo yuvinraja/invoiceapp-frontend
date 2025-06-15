@@ -1,30 +1,59 @@
-"use client"
+"use client";
 
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { invoiceSchema, type InvoiceInput } from "@/lib/validation/invoice"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Trash2, Plus } from "lucide-react"
-import api from "@/lib/axios"
-import { useState } from "react"
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { invoiceSchema, type InvoiceInput } from "@/lib/validation/invoice";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Trash2,
+  Plus,
+  FileText,
+  Calculator,
+  User,
+  Package,
+  Download,
+  Eye,
+  ArrowLeft,
+  Truck,
+  Hash,
+  Loader2,
+} from "lucide-react";
+import api from "@/lib/axios";
+import { useState } from "react";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import { InvoicePDF } from "@/components/invoice/InvoicePDF";
+import Link from "next/link";
 
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer"
-import { InvoicePDF } from "@/components/invoice/InvoicePDF"
+import ProfileGuard from "@/components/profile-guard";
 
 export default function CreateInvoicePage() {
-  const {
-    register,
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<InvoiceInput>({
+  const form = useForm<InvoiceInput>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
       invoiceType: "TAX",
@@ -33,18 +62,18 @@ export default function CreateInvoicePage() {
       taxRate: 18,
       items: [{ description: "", hsnCode: "", quantity: 1, rate: 0 }],
     },
-  })
+  });
 
   const { fields, append, remove } = useFieldArray({
-    control,
+    control: form.control,
     name: "items",
-  })
+  });
 
-  const [loading, setLoading] = useState(false)
-  const [submittedData, setSubmittedData] = useState<InvoiceInput | null>(null)
+  const [loading, setLoading] = useState(false);
+  const [submittedData, setSubmittedData] = useState<InvoiceInput | null>(null);
 
   const onSubmit = async (data: InvoiceInput) => {
-    setLoading(true)
+    setLoading(true);
     try {
       // Calculate totals before submitting
       const calculatedData = {
@@ -55,379 +84,898 @@ export default function CreateInvoicePage() {
         igst,
         total,
         roundedTotal,
-      }
-
-      await api.post("/invoices", calculatedData)
-      setSubmittedData(calculatedData)
-      alert("Invoice created successfully!")
+      };
+      await api.post("/invoices", calculatedData);
+      setSubmittedData(calculatedData);
+      alert("Invoice created successfully!");
     } catch (err) {
-      console.error(err)
-      alert("Failed to create invoice")
+      console.error(err);
+      alert("Failed to create invoice");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Watch form values for calculations
-  const items = watch("items") || []
-  const taxType = watch("taxType")
-  const taxRate = watch("taxRate") || 18
-  const invoiceType = watch("invoiceType")
+  const items = form.watch("items") || [];
+  const taxType = form.watch("taxType");
+  const taxRate = form.watch("taxRate") || 18;
+  const invoiceType = form.watch("invoiceType");
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => {
-    const quantity = Number(item.quantity) || 0
-    const rate = Number(item.rate) || 0
-    return sum + quantity * rate
-  }, 0)
+    const quantity = Number(item.quantity) || 0;
+    const rate = Number(item.rate) || 0;
+    return sum + quantity * rate;
+  }, 0);
 
-  const cgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0
-  const sgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0
-  const igst = taxType === "IGST" ? (subtotal * taxRate) / 100 : 0
-  const total = subtotal + cgst + sgst + igst
-  const roundedTotal = Math.round(total)
+  const cgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0;
+  const sgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0;
+  const igst = taxType === "IGST" ? (subtotal * taxRate) / 100 : 0;
+  const total = subtotal + cgst + sgst + igst;
+  const roundedTotal = Math.round(total);
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Invoice Generator</h1>
-        <p className="text-gray-600 mt-2">Create professional GST invoices</p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Invoice Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Invoice Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="invoiceType">Invoice Type</Label>
-                <Select onValueChange={(val: "TAX" | "PROFORMA") => setValue("invoiceType", val)} defaultValue="TAX">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TAX">Tax Invoice</SelectItem>
-                    <SelectItem value="PROFORMA">Proforma Invoice</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="taxType">Tax Type</Label>
-                <Select onValueChange={(val: "CGST_SGST" | "IGST") => setValue("taxType", val)} defaultValue="CGST_SGST">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CGST_SGST">CGST + SGST</SelectItem>
-                    <SelectItem value="IGST">IGST</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="taxRate">Tax Rate (%)</Label>
-                <Input
-                  id="taxRate"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  {...register("taxRate", { valueAsNumber: true })}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Invoice Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Invoice Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="invoiceNumber">Invoice Number *</Label>
-                <Input
-                  id="invoiceNumber"
-                  type="number"
-                  {...register("invoiceNumber", { valueAsNumber: true })}
-                  className={errors.invoiceNumber ? "border-red-500" : ""}
-                />
-                {errors.invoiceNumber && <p className="text-red-500 text-sm mt-1">{errors.invoiceNumber.message}</p>}
-              </div>
-
-              <div>
-                <Label htmlFor="invoiceDate">Invoice Date *</Label>
-                <Input
-                  id="invoiceDate"
-                  type="date"
-                  {...register("invoiceDate")}
-                  className={errors.invoiceDate ? "border-red-500" : ""}
-                />
-              </div>
-
-              {invoiceType === "TAX" && (
-                <>
-                  <div>
-                    <Label htmlFor="poNumber">PO Number</Label>
-                    <Input id="poNumber" {...register("poNumber")} />
-                  </div>
-                  <div>
-                    <Label htmlFor="vehicleNumber">Vehicle Number</Label>
-                    <Input id="vehicleNumber" {...register("vehicleNumber")} />
-                  </div>
-                  <div>
-                    <Label htmlFor="transporter">Transporter</Label>
-                    <Input id="transporter" {...register("transporter")} />
-                  </div>
-                  <div>
-                    <Label htmlFor="bundleCount">No. of Bundles</Label>
-                    <Input
-                      id="bundleCount"
-                      type="number"
-                      min="0"
-                      {...register("bundleCount", { valueAsNumber: true })}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Client Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Client Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="clientName">Client Name *</Label>
-                <Input
-                  id="clientName"
-                  {...register("client.name")}
-                  placeholder="Enter client name"
-                  className={errors.client?.name ? "border-red-500" : ""}
-                />
-              </div>
-              <div>
-                <Label htmlFor="clientGstin">GSTIN</Label>
-                <Input id="clientGstin" {...register("client.gstin")} placeholder="Enter GSTIN" />
-              </div>
-              <div>
-                <Label htmlFor="clientAddress">Address *</Label>
-                <Input id="clientAddress" {...register("client.address")} placeholder="Enter address" />
-              </div>
-              <div>
-                <Label htmlFor="clientCity">City *</Label>
-                <Input id="clientCity" {...register("client.city")} placeholder="Enter city" />
-              </div>
-              <div>
-                <Label htmlFor="clientState">State *</Label>
-                <Input id="clientState" {...register("client.state")} placeholder="Enter state" />
-              </div>
-              <div>
-                <Label htmlFor="clientPincode">Pincode *</Label>
-                <Input id="clientPincode" {...register("client.pincode")} placeholder="Enter pincode" />
-              </div>
-            </div>
-
-            {invoiceType === "TAX" && (
-              <>
-                <Separator />
-                <h3 className="text-lg font-semibold">Shipping Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="shippingName">Shipping Name</Label>
-                    <Input id="shippingName" {...register("client.shippingName")} placeholder="Enter shipping name" />
-                  </div>
-                  <div>
-                    <Label htmlFor="shippingAddress">Shipping Address</Label>
-                    <Input
-                      id="shippingAddress"
-                      {...register("client.shippingAddress")}
-                      placeholder="Enter shipping address"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="shippingCity">Shipping City</Label>
-                    <Input id="shippingCity" {...register("client.shippingCity")} placeholder="Enter shipping city" />
-                  </div>
-                  <div>
-                    <Label htmlFor="shippingState">Shipping State</Label>
-                    <Input
-                      id="shippingState"
-                      {...register("client.shippingState")}
-                      placeholder="Enter shipping state"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="shippingPincode">Shipping Pincode</Label>
-                    <Input
-                      id="shippingPincode"
-                      {...register("client.shippingPincode")}
-                      placeholder="Enter shipping pincode"
-                    />
-                  </div>
+    <ProfileGuard>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/invoices" className="flex items-center">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Invoices
+                  </Link>
+                </Button>
+                <Separator orientation="vertical" className="h-6" />
+                <div>
+                  <h1 className="text-2xl font-bold">Create Invoice</h1>
+                  <p className="text-muted-foreground">
+                    Generate professional GST-compliant invoices
+                  </p>
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              </div>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <FileText className="h-3 w-3" />
+                Draft
+              </Badge>
+            </div>
+          </div>
+        </div>
 
-        {/* Items */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end p-4 border rounded-lg">
-                  <div className="md:col-span-2">
-                    <Label htmlFor={`item-description-${index}`}>Description *</Label>
-                    <Input
-                      id={`item-description-${index}`}
-                      placeholder="Item description"
-                      {...register(`items.${index}.description`)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`item-hsn-${index}`}>HSN Code</Label>
-                    <Input id={`item-hsn-${index}`} placeholder="HSN Code" {...register(`items.${index}.hsnCode`)} />
-                  </div>
-                  <div>
-                    <Label htmlFor={`item-quantity-${index}`}>Quantity *</Label>
-                    <Input
-                      id={`item-quantity-${index}`}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Qty"
-                      {...register(`items.${index}.quantity`, {
-                        valueAsNumber: true,
-                      })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`item-rate-${index}`}>Rate *</Label>
-                    <Input
-                      id={`item-rate-${index}`}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Rate"
-                      {...register(`items.${index}.rate`, { valueAsNumber: true })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Amount</Label>
-                    <div className="p-2 bg-gray-50 rounded border text-right">
-                      ₹{((items[index]?.quantity || 0) * (items[index]?.rate || 0)).toFixed(2)}
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                {/* Invoice Configuration */}
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      Invoice Configuration
+                    </CardTitle>
+                    <CardDescription>
+                      Set up the basic invoice type and tax configuration
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-6 md:grid-cols-3">
+                      <FormField
+                        control={form.control}
+                        name="invoiceType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Invoice Type
+                            </FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-11">
+                                  <SelectValue placeholder="Select invoice type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="TAX">Tax Invoice</SelectItem>
+                                <SelectItem value="PROFORMA">
+                                  Proforma Invoice
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="taxType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Tax Type
+                            </FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-11">
+                                  <SelectValue placeholder="Select tax type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="CGST_SGST">
+                                  CGST + SGST
+                                </SelectItem>
+                                <SelectItem value="IGST">IGST</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="taxRate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Tax Rate (%)
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                placeholder="18"
+                                className="h-11"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    Number.parseFloat(e.target.value)
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+
+                {/* Invoice Details */}
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                        <Hash className="h-4 w-4" />
+                      </div>
+                      Invoice Details
+                    </CardTitle>
+                    <CardDescription>
+                      Basic invoice information and reference numbers
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      <FormField
+                        control={form.control}
+                        name="invoiceNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Invoice Number *
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Enter invoice number"
+                                className="h-11"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    Number.parseInt(e.target.value)
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="invoiceDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Invoice Date *
+                            </FormLabel>
+                            <FormControl>
+                              <Input type="date" className="h-11" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {invoiceType === "TAX" && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name="poNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">
+                                  PO Number
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Purchase order number"
+                                    className="h-11"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="vehicleNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">
+                                  Vehicle Number
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="MH01AB1234"
+                                    className="h-11"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="transporter"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">
+                                  Transporter
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Transporter name"
+                                    className="h-11"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="bundleCount"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">
+                                  No. of Bundles
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    className="h-11"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        Number.parseInt(e.target.value)
+                                      )
+                                    }
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Client Details */}
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                        <User className="h-4 w-4" />
+                      </div>
+                      Client Details
+                    </CardTitle>
+                    <CardDescription>
+                      Customer information and billing address
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      <FormField
+                        control={form.control}
+                        name="client.name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Client Name *
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter client name"
+                                className="h-11"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="client.gstin"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              GSTIN
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="22AAAAA0000A1Z5"
+                                className="h-11"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="client.address"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-2 lg:col-span-1">
+                            <FormLabel className="text-sm font-medium">
+                              Address *
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Enter complete address"
+                                className="min-h-[44px] resize-none"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="client.city"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              City *
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Mumbai"
+                                className="h-11"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="client.state"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              State *
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Maharashtra"
+                                className="h-11"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="client.pincode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Pincode *
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="400001"
+                                className="h-11"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {invoiceType === "TAX" && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Truck className="h-5 w-5" />
+                            Shipping Details
+                          </h3>
+                          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            <FormField
+                              control={form.control}
+                              name="client.shippingName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">
+                                    Shipping Name
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Shipping contact name"
+                                      className="h-11"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="client.shippingAddress"
+                              render={({ field }) => (
+                                <FormItem className="md:col-span-2 lg:col-span-1">
+                                  <FormLabel className="text-sm font-medium">
+                                    Shipping Address
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder="Enter shipping address"
+                                      className="min-h-[44px] resize-none"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="client.shippingCity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">
+                                    Shipping City
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Mumbai"
+                                      className="h-11"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="client.shippingState"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">
+                                    Shipping State
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Maharashtra"
+                                      className="h-11"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="client.shippingPincode"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">
+                                    Shipping Pincode
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="400001"
+                                      className="h-11"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Items */}
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                        <Package className="h-4 w-4" />
+                      </div>
+                      Invoice Items
+                    </CardTitle>
+                    <CardDescription>
+                      Add products or services to your invoice
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      {fields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className="p-6 border-2 rounded-lg bg-muted/20"
+                        >
+                          <div className="grid gap-4 md:grid-cols-6 items-end">
+                            <div className="md:col-span-2">
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.description`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">
+                                      Description *
+                                    </FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        placeholder="Item description"
+                                        className="h-11"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.hsnCode`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">
+                                    HSN Code
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="HSN Code"
+                                      className="h-11"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.quantity`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">
+                                    Quantity *
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="1"
+                                      className="h-11"
+                                      {...field}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          Number.parseFloat(e.target.value)
+                                        )
+                                      }
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.rate`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">
+                                    Rate *
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      className="h-11"
+                                      {...field}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          Number.parseFloat(e.target.value)
+                                        )
+                                      }
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="flex items-end gap-2">
+                              <div className="flex-1">
+                                <FormLabel className="text-sm font-medium">
+                                  Amount
+                                </FormLabel>
+                                <div className="h-11 px-3 py-2 bg-muted rounded-md border flex items-center justify-end font-medium">
+                                  ₹
+                                  {(
+                                    (items[index]?.quantity || 0) *
+                                    (items[index]?.rate || 0)
+                                  ).toFixed(2)}
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => remove(index)}
+                                disabled={fields.length === 1}
+                                className="h-11 w-11 text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          append({
+                            description: "",
+                            hsnCode: "",
+                            quantity: 1,
+                            rate: 0,
+                          })
+                        }
+                        className="w-full h-12 border-2 border-dashed"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Another Item
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Invoice Summary */}
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                        <Calculator className="h-4 w-4" />
+                      </div>
+                      Invoice Summary
+                    </CardTitle>
+                    <CardDescription>
+                      Calculated totals and tax breakdown
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="bg-muted/30 p-6 rounded-lg">
+                        <div className="space-y-3">
+                          <div className="flex justify-between text-base">
+                            <span className="text-muted-foreground">
+                              Subtotal:
+                            </span>
+                            <span className="font-medium">
+                              ₹{subtotal.toFixed(2)}
+                            </span>
+                          </div>
+
+                          {taxType === "CGST_SGST" ? (
+                            <>
+                              <div className="flex justify-between text-base">
+                                <span className="text-muted-foreground">
+                                  CGST ({(taxRate / 2).toFixed(1)}%):
+                                </span>
+                                <span className="font-medium">
+                                  ₹{cgst.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-base">
+                                <span className="text-muted-foreground">
+                                  SGST ({(taxRate / 2).toFixed(1)}%):
+                                </span>
+                                <span className="font-medium">
+                                  ₹{sgst.toFixed(2)}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex justify-between text-base">
+                              <span className="text-muted-foreground">
+                                IGST ({taxRate.toFixed(1)}%):
+                              </span>
+                              <span className="font-medium">
+                                ₹{igst.toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+
+                          <Separator />
+
+                          <div className="flex justify-between text-lg font-semibold">
+                            <span>Total:</span>
+                            <span>₹{total.toFixed(2)}</span>
+                          </div>
+
+                          <div className="flex justify-between text-xl font-bold">
+                            <span>Rounded Total:</span>
+                            <span>₹{roundedTotal}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Submit Button */}
+                <div className="flex justify-center pt-6">
                   <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => remove(index)}
-                    disabled={fields.length === 1}
-                    className="text-red-600 hover:text-red-700"
+                    type="submit"
+                    disabled={loading || items.length === 0}
+                    size="lg"
+                    className="min-w-[200px] h-12"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Invoice...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Generate Invoice
+                      </>
+                    )}
                   </Button>
                 </div>
-              ))}
+              </form>
+            </Form>
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => append({ description: "", hsnCode: "", quantity: 1, rate: 0 })}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Item
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Totals */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Invoice Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-right">
-              <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span>₹{subtotal.toFixed(2)}</span>
-              </div>
-              {taxType === "CGST_SGST" ? (
-                <>
-                  <div className="flex justify-between">
-                    <span>CGST ({(taxRate / 2).toFixed(1)}%):</span>
-                    <span>₹{cgst.toFixed(2)}</span>
+            {/* Generated Invoice Preview */}
+            {submittedData && (
+              <Card className="border-2 mt-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                      <Eye className="h-4 w-4" />
+                    </div>
+                    Generated Invoice
+                    <Badge variant="secondary" className="ml-2">
+                      Ready
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Your invoice has been generated successfully
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex gap-4">
+                    <PDFDownloadLink
+                      document={<InvoicePDF data={submittedData} />}
+                      fileName={`invoice-${submittedData.invoiceNumber}.pdf`}
+                    >
+                      {({ loading }) => (
+                        <Button
+                          disabled={loading}
+                          className="flex items-center gap-2"
+                        >
+                          {loading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
+                          {loading ? "Preparing PDF..." : "Download PDF"}
+                        </Button>
+                      )}
+                    </PDFDownloadLink>
                   </div>
-                  <div className="flex justify-between">
-                    <span>SGST ({(taxRate / 2).toFixed(1)}%):</span>
-                    <span>₹{sgst.toFixed(2)}</span>
-                  </div>
-                </>
-              ) : (
-                <div className="flex justify-between">
-                  <span>IGST ({taxRate.toFixed(1)}%):</span>
-                  <span>₹{igst.toFixed(2)}</span>
-                </div>
-              )}
-              <Separator />
-              <div className="flex justify-between text-lg font-semibold">
-                <span>Total:</span>
-                <span>₹{total.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold">
-                <span>Rounded Total:</span>
-                <span>₹{roundedTotal}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <div className="flex justify-center">
-          <Button type="submit" disabled={loading || items.length === 0} size="lg" className="px-8">
-            {loading ? "Generating..." : "Generate Invoice"}
-          </Button>
+                  <div
+                    className="border-2 rounded-lg overflow-hidden"
+                    style={{ height: "80vh" }}
+                  >
+                    <PDFViewer style={{ width: "100%", height: "100%" }}>
+                      <InvoicePDF data={submittedData} />
+                    </PDFViewer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
-      </form>
-
-      {submittedData && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Invoice</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <PDFDownloadLink
-                document={<InvoicePDF data={submittedData} />}
-                fileName={`invoice-${submittedData.invoiceNumber}.pdf`}
-              >
-                {({ loading }) => <Button disabled={loading}>{loading ? "Preparing PDF..." : "Download PDF"}</Button>}
-              </PDFDownloadLink>
-            </div>
-            <div className="border rounded-lg overflow-hidden" style={{ height: "80vh" }}>
-              <PDFViewer style={{ width: "100%", height: "100%" }}>
-                <InvoicePDF data={submittedData} />
-              </PDFViewer>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  )
+      </div>
+    </ProfileGuard>
+  );
 }

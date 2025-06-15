@@ -14,7 +14,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/context/AuthContext"
 import { toast } from "sonner"
@@ -150,14 +149,6 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="px-2 py-3">
-              <div className="flex items-center gap-2 mb-3">
-                <Badge variant="secondary" className="text-xs">
-                  Pro Plan
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  Active
-                </Badge>
-              </div>
               <Button variant="outline" className="w-full justify-start h-10 bg-background" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out

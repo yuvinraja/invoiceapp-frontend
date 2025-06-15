@@ -266,7 +266,7 @@ export const InvoicePDF = ({ data }: Props) => {
               <>
                 <Text>PO NO: {poNumber || "-"}</Text>
                 <Text>Vehicle Number: {vehicleNumber || "-"}</Text>
-                <Text>Transporter Number: {transporter || "-"}</Text>
+                <Text>Transporter: {transporter || "-"}</Text>
                 <Text>No. of Bundles: {bundleCount}</Text>
               </>
             )}
