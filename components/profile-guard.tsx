@@ -28,6 +28,7 @@ interface UserProfile {
 }
 
 export default function ProfileGuard({ children }: ProfileGuardProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [isComplete, setIsComplete] = useState(false)

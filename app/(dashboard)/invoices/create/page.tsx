@@ -50,6 +50,7 @@ import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import { InvoicePDF } from "@/components/invoice/InvoicePDF";
 import Link from "next/link";
 
+import type { Invoice } from "@/lib/types/user";
 import ProfileGuard from "@/components/profile-guard";
 
 export default function CreateInvoicePage() {
@@ -70,7 +71,7 @@ export default function CreateInvoicePage() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [submittedData, setSubmittedData] = useState<InvoiceInput | null>(null);
+  const [submittedData, setSubmittedData] = useState<Invoice | null>(null);
 
   const onSubmit = async (data: InvoiceInput) => {
     setLoading(true);
@@ -85,8 +86,8 @@ export default function CreateInvoicePage() {
         total,
         roundedTotal,
       };
-      await api.post("/invoices", calculatedData);
-      setSubmittedData(calculatedData);
+      const response = await api.post("/invoices", calculatedData);
+      setSubmittedData(response.data.invoice);
       alert("Invoice created successfully!");
     } catch (err) {
       console.error(err);
