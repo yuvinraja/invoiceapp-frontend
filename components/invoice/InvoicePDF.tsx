@@ -28,17 +28,19 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     flex: 1,
-    textAlign: "right",
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    marginBottom: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    display: "flex",
   },
   invoiceTitle: {
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
+    marginBottom: 5,
+  },
+  logo: {
+    width: 50,
+    height: 50,
     marginBottom: 5,
   },
   originalText: {
@@ -162,6 +164,11 @@ export const InvoicePDF = ({ data }: Props) => {
     total = 0,
     roundedTotal = 0,
     taxRate = 18,
+    shippingName = "shipping name",
+    shippingAddress = "shipping address",
+    shippingCity = "shipping city",
+    shippingState = "shipping state",
+    shippingPincode = "shipping pincode",
   } = data || {};
 
   // Default values for missing data
@@ -194,15 +201,11 @@ export const InvoicePDF = ({ data }: Props) => {
     state: "State",
     pincode: "123456",
     gstin: "CLIENT123456789",
-    shippingName: "",
-    shippingAddress: "",
-    shippingCity: "",
-    shippingState: "",
-    shippingPincode: "",
   };
 
   const invoiceUser = { ...defaultUser, ...user };
   const invoiceClient = { ...defaultClient, ...client };
+
   const toWords = new ToWords();
 
   // Calculate individual item totals
@@ -224,16 +227,15 @@ export const InvoicePDF = ({ data }: Props) => {
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { justifyContent: "space-between" }]}>
           <View style={styles.headerLeft}>
             {invoiceUser.logoUrl && (
-              <Image
-                src={invoiceUser.logoUrl || "/placeholder.svg"}
-                style={styles.logo}
-              />
+              <Image src={invoiceUser.logoUrl} style={styles.logo} />
             )}
           </View>
-          <View style={styles.headerRight}>
+          <View
+            style={{ flex: 2, justifyContent: "center", alignItems: "center" }}
+          >
             <Text style={styles.originalText}>
               Original/Duplicate/Triplicate
             </Text>
@@ -241,6 +243,7 @@ export const InvoicePDF = ({ data }: Props) => {
               {invoiceType === "TAX" ? "TAX INVOICE" : "PROFORMA INVOICE"}
             </Text>
           </View>
+          <View style={{ flex: 1 }} /> {/* Spacer to balance layout */}
         </View>
 
         {/* Company and Invoice Details */}
@@ -255,7 +258,6 @@ export const InvoicePDF = ({ data }: Props) => {
             <Text>Ph: {invoiceUser.phone}</Text>
             <Text>Mob: {invoiceUser.mobile}</Text>
             <Text>GSTIN: {invoiceUser.gstin}</Text>
-            <Text>MSME UDYAM NO: (optional)</Text>
           </View>
           <View style={styles.rightColumn}>
             <Text>Invoice Number: {invoiceNumber}</Text>
@@ -284,21 +286,20 @@ export const InvoicePDF = ({ data }: Props) => {
               {invoiceClient.pincode}
             </Text>
             <Text>Client GSTIN: {invoiceClient.gstin || "-"}</Text>
-
             {invoiceType === "TAX" &&
-              (invoiceClient.shippingName || invoiceClient.shippingAddress) && (
+              (shippingName || shippingAddress) && (
                 <View style={{ marginTop: 10 }}>
                   <Text style={styles.bold}>Consignee - Ship To:</Text>
                   <Text>
-                    {invoiceClient.shippingName || invoiceClient.name}
+                    {shippingName || invoiceClient.name}
                   </Text>
                   <Text>
-                    {invoiceClient.shippingAddress || invoiceClient.address}
+                    {shippingAddress || invoiceClient.address}
                   </Text>
                   <Text>
-                    {invoiceClient.shippingCity || invoiceClient.city},{" "}
-                    {invoiceClient.shippingState || invoiceClient.state} -{" "}
-                    {invoiceClient.shippingPincode || invoiceClient.pincode}
+                    {shippingCity || invoiceClient.city},{" "}
+                    {shippingState || invoiceClient.state} -{" "}
+                    {shippingPincode || invoiceClient.pincode}
                   </Text>
                 </View>
               )}
@@ -328,7 +329,6 @@ export const InvoicePDF = ({ data }: Props) => {
             <Text style={[styles.tableCellHeader, { flex: 1 }]}>GST</Text>
             <Text style={[styles.tableCellHeader, { flex: 1 }]}>Amount</Text>
           </View>
-
           {itemsWithTotals.length > 0
             ? itemsWithTotals.map((item, i) => (
                 <View style={styles.tableRow} key={i}>
@@ -372,19 +372,16 @@ export const InvoicePDF = ({ data }: Props) => {
           <View style={styles.totalsLeft}>
             <Text style={styles.bold}>Total Invoice Amount (in words):</Text>
             <Text>{toWords.convert(roundedTotal)} rupees only</Text>
-
             <View style={{ marginTop: 15 }}>
               <Text style={styles.bold}>Notes:</Text>
               <Text>Thank you for your business!</Text>
             </View>
           </View>
-
           <View style={styles.totalsRight}>
             <View style={styles.totalRow}>
               <Text>Taxable Amt:</Text>
               <Text>{subtotal.toFixed(2)}</Text>
             </View>
-
             {taxType === "CGST_SGST" ? (
               <>
                 <View style={styles.totalRow}>
@@ -402,7 +399,6 @@ export const InvoicePDF = ({ data }: Props) => {
                 <Text>{igst.toFixed(2)}</Text>
               </View>
             )}
-
             <View
               style={[
                 styles.totalRow,
@@ -416,7 +412,6 @@ export const InvoicePDF = ({ data }: Props) => {
               <Text>Total:</Text>
               <Text>{total.toFixed(2)}</Text>
             </View>
-
             <View style={[styles.totalRow, { fontWeight: "bold" }]}>
               <Text>Rounded Off:</Text>
               <Text>{roundedTotal}</Text>

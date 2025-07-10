@@ -53,6 +53,9 @@ import Link from "next/link";
 import type { Invoice } from "@/lib/types/user";
 import ProfileGuard from "@/components/profile-guard";
 
+import { getInvoiceById } from "@/lib/invoices";
+import { toast } from "sonner";
+
 export default function CreateInvoicePage() {
   const form = useForm<InvoiceInput>({
     resolver: zodResolver(invoiceSchema),
@@ -76,7 +79,6 @@ export default function CreateInvoicePage() {
   const onSubmit = async (data: InvoiceInput) => {
     setLoading(true);
     try {
-      // Calculate totals before submitting
       const calculatedData = {
         ...data,
         subtotal,
@@ -86,12 +88,16 @@ export default function CreateInvoicePage() {
         total,
         roundedTotal,
       };
+
       const response = await api.post("/invoices", calculatedData);
-      setSubmittedData(response.data.invoice);
-      alert("Invoice created successfully!");
+
+      const invoiceId = response.data.invoice.id;
+      const fullInvoice = await getInvoiceById(invoiceId);
+      setSubmittedData(fullInvoice);
+      toast.success("Invoice created successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to create invoice");
+      toast.error("Failed to create invoice");
     } finally {
       setLoading(false);
     }
@@ -556,7 +562,7 @@ export default function CreateInvoicePage() {
                           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             <FormField
                               control={form.control}
-                              name="client.shippingName"
+                              name="shippingName"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel className="text-sm font-medium">
@@ -576,7 +582,7 @@ export default function CreateInvoicePage() {
 
                             <FormField
                               control={form.control}
-                              name="client.shippingAddress"
+                              name="shippingAddress"
                               render={({ field }) => (
                                 <FormItem className="md:col-span-2 lg:col-span-1">
                                   <FormLabel className="text-sm font-medium">
@@ -596,7 +602,7 @@ export default function CreateInvoicePage() {
 
                             <FormField
                               control={form.control}
-                              name="client.shippingCity"
+                              name="shippingCity"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel className="text-sm font-medium">
@@ -616,7 +622,7 @@ export default function CreateInvoicePage() {
 
                             <FormField
                               control={form.control}
-                              name="client.shippingState"
+                              name="shippingState"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel className="text-sm font-medium">
@@ -636,7 +642,7 @@ export default function CreateInvoicePage() {
 
                             <FormField
                               control={form.control}
-                              name="client.shippingPincode"
+                              name="shippingPincode"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel className="text-sm font-medium">

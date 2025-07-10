@@ -1,90 +1,183 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useRouter } from "next/navigation"
-import { FileText, Plus, Search, Eye, Trash2, Calendar, User, DollarSign, Filter, Download } from "lucide-react"
-import { format } from "date-fns"
-import api from "@/lib/axios"
-import Protected from "@/components/auth/Protected"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
+import {
+  FileText,
+  Plus,
+  Search,
+  Eye,
+  Trash2,
+  Calendar,
+  User,
+  DollarSign,
+  Filter,
+  Download,
+  Loader2,
+} from "lucide-react";
+import { format } from "date-fns";
+import api from "@/lib/axios";
+import Protected from "@/components/auth/Protected";
+import Link from "next/link";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { InvoicePDF } from "@/components/invoice/InvoicePDF";
+
+import { Invoice } from "@/lib/types/user";
+
+const DownloadInvoiceButton = ({
+  invoiceId,
+  invoiceNumber,
+}: {
+  invoiceId: string;
+  invoiceNumber: string;
+}) => {
+  const [fullInvoice, setFullInvoice] = useState<Invoice | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchAndDownload = async () => {
+    if (fullInvoice) {
+      // If we already have the data, trigger download
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.get(`/invoices/${invoiceId}`);
+      setFullInvoice(response.data);
+    } catch (error) {
+      console.error("Failed to fetch invoice:", error);
+      alert("Failed to fetch invoice data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (fullInvoice) {
+    return (
+      <PDFDownloadLink
+        document={<InvoicePDF data={fullInvoice} />}
+        fileName={`invoice-${invoiceNumber}.pdf`}
+        onClick={() => setFullInvoice(null)} // Reset after download
+      >
+        {({ loading }) => (
+          <Button variant="outline" size="sm" disabled={loading}>
+            {loading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            {loading ? "Preparing..." : "Download"}
+          </Button>
+        )}
+      </PDFDownloadLink>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={fetchAndDownload}
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+      ) : (
+        <Download className="h-4 w-4 mr-2" />
+      )}
+      {isLoading ? "Loading..." : "Download"}
+    </Button>
+  );
+};
 
 type InvoiceSummary = {
-  id: string
-  invoiceNumber: string
-  invoiceDate: string
-  invoiceType: "TAX" | "PROFORMA"
-  taxType: "CGST_SGST" | "IGST"
-  total: number
-  clientName: string
-}
+  id: string;
+  invoiceNumber: string;
+  invoiceDate: string;
+  invoiceType: "TAX" | "PROFORMA";
+  taxType: "CGST_SGST" | "IGST";
+  total: number;
+  clientName: string;
+};
 
 export default function InvoiceListPage() {
-  const [invoices, setInvoices] = useState<InvoiceSummary[]>([])
-  const [filteredInvoices, setFilteredInvoices] = useState<InvoiceSummary[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterType, setFilterType] = useState<"ALL" | "TAX" | "PROFORMA">("ALL")
-  const router = useRouter()
+  const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
+  const [filteredInvoices, setFilteredInvoices] = useState<InvoiceSummary[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<"ALL" | "TAX" | "PROFORMA">(
+    "ALL"
+  );
+  const router = useRouter();
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const res = await api.get("/invoices")
-        setInvoices(res.data)
-        setFilteredInvoices(res.data)
+        const res = await api.get("/invoices");
+        setInvoices(res.data);
+        setFilteredInvoices(res.data);
       } catch (err) {
-        console.error("Error fetching invoices", err)
+        console.error("Error fetching invoices", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchInvoices()
-  }, [])
+    fetchInvoices();
+  }, []);
 
   useEffect(() => {
-    let filtered = invoices
+    let filtered = invoices;
 
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (invoice) =>
           invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          invoice.invoiceNumber.toString().includes(searchTerm),
-      )
+          invoice.invoiceNumber.toString().includes(searchTerm)
+      );
     }
 
     // Filter by type
     if (filterType !== "ALL") {
-      filtered = filtered.filter((invoice) => invoice.invoiceType === filterType)
+      filtered = filtered.filter(
+        (invoice) => invoice.invoiceType === filterType
+      );
     }
 
-    setFilteredInvoices(filtered)
-  }, [invoices, searchTerm, filterType])
+    setFilteredInvoices(filtered);
+  }, [invoices, searchTerm, filterType]);
 
   const handleView = (id: string) => {
-    router.push(`/invoices/${id}`)
-  }
+    router.push(`/invoices/${id}`);
+  };
 
   const handleDelete = async (id: string) => {
-    const confirm = window.confirm("Are you sure you want to delete this invoice?")
-    if (!confirm) return
+    const confirm = window.confirm(
+      "Are you sure you want to delete this invoice?"
+    );
+    if (!confirm) return;
 
     try {
-      await api.delete(`/invoices/${id}`)
-      setInvoices((prev) => prev.filter((inv) => inv.id !== id))
+      await api.delete(`/invoices/${id}`);
+      setInvoices((prev) => prev.filter((inv) => inv.id !== id));
     } catch (err) {
-      console.error("Delete failed", err)
-      alert("Failed to delete invoice")
+      console.error("Delete failed", err);
+      alert("Failed to delete invoice");
     }
-  }
+  };
 
-  const totalRevenue = filteredInvoices.reduce((sum, invoice) => sum + invoice.total, 0)
+  const totalRevenue = filteredInvoices.reduce(
+    (sum, invoice) => sum + invoice.total,
+    0
+  );
 
   if (loading) {
     return (
@@ -134,7 +227,7 @@ export default function InvoiceListPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -145,7 +238,9 @@ export default function InvoiceListPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Invoice Management</h1>
-              <p className="text-muted-foreground text-lg">Manage and track all your GST-compliant invoices</p>
+              <p className="text-muted-foreground text-lg">
+                Manage and track all your GST-compliant invoices
+              </p>
             </div>
             <Button asChild size="lg" className="flex items-center gap-2">
               <Link href="/invoices/create">
@@ -159,35 +254,49 @@ export default function InvoiceListPage() {
           <div className="grid gap-6 md:grid-cols-3">
             <Card className="border-2">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Invoices</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Invoices
+                </CardTitle>
                 <div className="p-2 bg-muted rounded-lg">
                   <FileText className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{filteredInvoices.length}</div>
+                <div className="text-3xl font-bold">
+                  {filteredInvoices.length}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  {filterType === "ALL" ? "All invoices" : `${filterType} invoices`}
+                  {filterType === "ALL"
+                    ? "All invoices"
+                    : `${filterType} invoices`}
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-2">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Revenue
+                </CardTitle>
                 <div className="p-2 bg-muted rounded-lg">
                   <DollarSign className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">From filtered invoices</p>
+                <div className="text-3xl font-bold">
+                  ₹{totalRevenue.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  From filtered invoices
+                </p>
               </CardContent>
             </Card>
 
             <Card className="border-2">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Average Value</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Average Value
+                </CardTitle>
                 <div className="p-2 bg-muted rounded-lg">
                   <Calendar className="h-4 w-4" />
                 </div>
@@ -196,7 +305,9 @@ export default function InvoiceListPage() {
                 <div className="text-3xl font-bold">
                   ₹
                   {filteredInvoices.length > 0
-                    ? Math.round(totalRevenue / filteredInvoices.length).toLocaleString()
+                    ? Math.round(
+                        totalRevenue / filteredInvoices.length
+                      ).toLocaleString()
                     : 0}
                 </div>
                 <p className="text-xs text-muted-foreground">Per invoice</p>
@@ -258,7 +369,9 @@ export default function InvoiceListPage() {
                   <div className="text-center">
                     <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-xl font-semibold mb-2">
-                      {searchTerm || filterType !== "ALL" ? "No matching invoices" : "No invoices yet"}
+                      {searchTerm || filterType !== "ALL"
+                        ? "No matching invoices"
+                        : "No invoices yet"}
                     </h3>
                     <p className="text-muted-foreground mb-6">
                       {searchTerm || filterType !== "ALL"
@@ -278,17 +391,30 @@ export default function InvoiceListPage() {
               </Card>
             ) : (
               filteredInvoices.map((invoice) => (
-                <Card key={invoice.id} className="border-2 transition-all hover:shadow-lg hover:-translate-y-1">
+                <Card
+                  key={invoice.id}
+                  className="border-2 transition-all hover:shadow-lg hover:-translate-y-1"
+                >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <h3 className="text-xl font-semibold">#{invoice.invoiceNumber}</h3>
-                          <Badge variant={invoice.invoiceType === "TAX" ? "default" : "secondary"}>
+                          <h3 className="text-xl font-semibold">
+                            #{invoice.invoiceNumber}
+                          </h3>
+                          <Badge
+                            variant={
+                              invoice.invoiceType === "TAX"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
                             {invoice.invoiceType}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
-                            {invoice.taxType === "CGST_SGST" ? "CGST+SGST" : "IGST"}
+                            {invoice.taxType === "CGST_SGST"
+                              ? "CGST+SGST"
+                              : "IGST"}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -298,23 +424,31 @@ export default function InvoiceListPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {format(new Date(invoice.invoiceDate), "dd MMM yyyy")}
+                            {format(
+                              new Date(invoice.invoiceDate),
+                              "dd MMM yyyy"
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-1 text-lg font-semibold">
-                          <DollarSign className="h-4 w-4" />₹{invoice.total.toLocaleString()}
+                          <DollarSign className="h-4 w-4" />₹
+                          {invoice.total.toLocaleString()}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" onClick={() => handleView(invoice.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleView(invoice.id)}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           View
                         </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
+                        <DownloadInvoiceButton
+                          invoiceId={invoice.id}
+                          invoiceNumber={invoice.invoiceNumber}
+                        />
                         <Button
                           variant="outline"
                           size="sm"
@@ -334,5 +468,5 @@ export default function InvoiceListPage() {
         </div>
       </div>
     </Protected>
-  )
+  );
 }

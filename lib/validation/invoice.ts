@@ -10,6 +10,11 @@ export const invoiceSchema = z.object({
   transporter: z.string().optional(),
   bundleCount: z.number().min(0).optional(),
   taxRate: z.number().min(0),
+  shippingName: z.string().optional(),
+  shippingAddress: z.string().optional(),
+  shippingCity: z.string().optional(),
+  shippingState: z.string().optional(),
+  shippingPincode: z.string().optional(),
   client: z.object({
     name: z.string().min(1),
     gstin: z.string().optional(),
@@ -17,11 +22,6 @@ export const invoiceSchema = z.object({
     city: z.string(),
     state: z.string(),
     pincode: z.string(),
-    shippingName: z.string().optional(),
-    shippingAddress: z.string().optional(),
-    shippingCity: z.string().optional(),
-    shippingState: z.string().optional(),
-    shippingPincode: z.string().optional(),
   }),
   items: z
     .array(
