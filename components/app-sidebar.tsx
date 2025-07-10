@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, FileText, Settings, LogOut, Building2, Plus, User } from "lucide-react"
+import { LayoutDashboard, FileText, Settings, LogOut, Building2, Plus, User, Monitor, Moon, Sun } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,13 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useTheme } from "next-themes"
 import { useAuth } from "@/context/AuthContext"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -55,6 +62,7 @@ const secondaryMenuItems = [
 
 export function AppSidebar() {
   const { user, logout } = useAuth()
+  const { setTheme } = useTheme()
 
   const handleLogout = async () => {
     try {
@@ -141,6 +149,33 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Theme Switcher */}
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton className="h-10 px-3 w-full justify-start">
+                      <Sun className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                      <Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                      <span className="text-sm ml-3">Theme</span>
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={() => setTheme("light")} className="flex items-center gap-2">
+                      <Sun className="h-4 w-4" />
+                      Light
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme("dark")} className="flex items-center gap-2">
+                      <Moon className="h-4 w-4" />
+                      Dark
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme("system")} className="flex items-center gap-2">
+                      <Monitor className="h-4 w-4" />
+                      System
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -3,7 +3,6 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { AppSidebar } from "@/components/app-sidebar"
 import Protected from "@/components/auth/Protected"
-import { ModeToggle } from "@/components/theme-switcher"
 
 export default function DashboardLayout({
   children,
@@ -20,7 +19,6 @@ export default function DashboardLayout({
             <Separator orientation="vertical" className="mr-2 h-4" />
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">GST Invoice Management</h2>
-              <ModeToggle />
             </div>
           </header>
           <main className="flex-1 p-6 bg-muted/20">{children}</main>
