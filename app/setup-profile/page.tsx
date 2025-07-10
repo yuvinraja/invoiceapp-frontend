@@ -30,6 +30,7 @@ import {
   User,
   Landmark,
 } from "lucide-react"
+import { toast } from "sonner"
 
 export default function SetupProfilePage() {
   const { user, loading } = useAuth()
@@ -64,8 +65,8 @@ export default function SetupProfilePage() {
       await api.post("/user/setup-profile", values)
       router.push("/invoices/create")
     } catch (err: any) {
-      console.error(err)
-      alert(err.response?.data?.message || "Failed to save profile")
+      // console.error(err)
+      toast.error(err.response?.data?.message || "Failed to save profile")
     } finally {
       setSubmitting(false)
     }

@@ -60,8 +60,9 @@ export function AppSidebar() {
     try {
       await logout()
       toast.success("Logged out successfully")
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error("Logout error:", error)
+      // console.error("Logout error:", error)
       toast.error("Failed to logout")
     }
   }

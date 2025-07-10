@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, Settings, ArrowRight } from "lucide-react"
 import api from "@/lib/axios"
 import Link from "next/link"
+import { toast } from "sonner"
 
 interface ProfileGuardProps {
   children: React.ReactNode
@@ -54,8 +55,10 @@ export default function ProfileGuard({ children }: ProfileGuardProps) {
         )
 
         setIsComplete(complete)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error("Profile check error:", error)
+        // console.error("Profile check error:", error)
+        toast.error("Failed to load profile. Please try again later.")
       } finally {
         setLoading(false)
       }

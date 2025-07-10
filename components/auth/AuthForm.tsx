@@ -193,17 +193,6 @@ export default function AuthForm({ mode }: Props) {
                     )}
                   />
 
-                  {mode === "login" && (
-                    <div className="flex justify-end">
-                      <Button
-                        variant="link"
-                        className="px-0 text-sm text-muted-foreground hover:text-foreground"
-                      >
-                        Forgot password?
-                      </Button>
-                    </div>
-                  )}
-
                   <Button
                     type="submit"
                     className="w-full h-11 text-base"
@@ -222,7 +211,7 @@ export default function AuthForm({ mode }: Props) {
                   <Separator className="w-full" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span className="bg-card px-2 text-muted-foreground">
                     {mode === "login"
                       ? "New to InvoiceGST?"
                       : "Already have an account?"}
@@ -243,16 +232,16 @@ export default function AuthForm({ mode }: Props) {
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">
-                    Already have an account?{" "}
+                    <div className="text-sm text-muted-foreground">
+                    Have an account already?{" "}
                     <Button
                       variant="link"
                       className="p-0 h-auto font-medium"
                       asChild
                     >
-                      <Link href="/login">Sign in instead</Link>
+                      <Link href="/login">Log in here</Link>
                     </Button>
-                  </div>
+                    </div>
                 )}
               </div>
             </CardContent>

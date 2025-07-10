@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { useEffect, useState } from "react"
@@ -60,7 +61,7 @@ export default function ProfilePage() {
         setProfile(res.data.user)
       } catch (err) {
         toast.error("Failed to load profile")
-        console.error("Profile fetch error:", err)
+        // console.error("Profile fetch error:", err)
       } finally {
         setLoading(false)
       }

@@ -40,9 +40,9 @@ export default function HomePage() {
             </Badge>
 
             <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-              Simple. <span className="text-muted-foreground">GST-Compliant.</span>
+              Simple. <span className="text-primary">GST-Compliant.</span>
               <br />
-              <span className="bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              <span className="text-accent-foreground">
                 Hassle-Free Invoicing.
               </span>
             </h1>
@@ -177,8 +177,16 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t bg-muted/30">
-        <div className="container mx-auto px-4 py-12">
-          <div className="text-center text-sm text-muted-foreground">© 2024 InvoiceGST. All rights reserved.</div>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center text-sm text-muted-foreground">© 2025 InvoiceGST. All rights reserved.
+          </div>
+          <div className="mt-4 text-center text-sm text-foreground">
+            Crafted with ❤️ by <span className="text-primary hover:underline">
+              <Link href="https://yuvinraja.vercel.app" target="_blank" rel="noopener noreferrer">
+                Yuvin Raja
+              </Link>
+            </span>
+          </div>
         </div>
       </footer>
     </div>

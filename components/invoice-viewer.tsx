@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -50,7 +51,7 @@ export default function InvoiceViewerPage({
         const res = await api.get(`/invoices/${invoiceId}`);
         setInvoice(res.data);
       } catch (err) {
-        console.error("Error fetching invoice:", err);
+        // console.error("Error fetching invoice:", err);
         toast.error("Failed to load invoice");
       } finally {
         setLoading(false);
@@ -75,7 +76,8 @@ export default function InvoiceViewerPage({
           url: window.location.href,
         });
       } catch (err) {
-        console.error("Error sharing:", err);
+        // console.error("Error sharing:", err);
+        toast.error("Failed to share invoice");
       }
     } else {
       // Fallback: copy to clipboard

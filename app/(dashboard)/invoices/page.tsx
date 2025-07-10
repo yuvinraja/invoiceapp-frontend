@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -15,7 +16,7 @@ import {
   Trash2,
   Calendar,
   User,
-  DollarSign,
+  IndianRupee,
   Filter,
   Download,
   Loader2,
@@ -28,6 +29,7 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { InvoicePDF } from "@/components/invoice/InvoicePDF";
 
 import { Invoice } from "@/lib/types/user";
+import { toast } from "sonner";
 
 const DownloadInvoiceButton = ({
   invoiceId,
@@ -50,8 +52,8 @@ const DownloadInvoiceButton = ({
       const response = await api.get(`/invoices/${invoiceId}`);
       setFullInvoice(response.data);
     } catch (error) {
-      console.error("Failed to fetch invoice:", error);
-      alert("Failed to fetch invoice data");
+      // console.error("Failed to fetch invoice:", error);
+      toast.error("Failed to fetch invoice data");
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +126,8 @@ export default function InvoiceListPage() {
         setInvoices(res.data);
         setFilteredInvoices(res.data);
       } catch (err) {
-        console.error("Error fetching invoices", err);
+        // console.error("Error fetching invoices", err);
+        toast.error("Failed to fetch invoices");
       } finally {
         setLoading(false);
       }
@@ -169,8 +172,8 @@ export default function InvoiceListPage() {
       await api.delete(`/invoices/${id}`);
       setInvoices((prev) => prev.filter((inv) => inv.id !== id));
     } catch (err) {
-      console.error("Delete failed", err);
-      alert("Failed to delete invoice");
+      // console.error("Delete failed", err);
+      toast.error("Failed to delete invoice");
     }
   };
 
@@ -279,7 +282,7 @@ export default function InvoiceListPage() {
                   Total Revenue
                 </CardTitle>
                 <div className="p-2 bg-muted rounded-lg">
-                  <DollarSign className="h-4 w-4" />
+                  <IndianRupee className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
@@ -411,7 +414,14 @@ export default function InvoiceListPage() {
                           >
                             {invoice.invoiceType}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${
+                              invoice.taxType === "CGST_SGST"
+                                ? ""
+                                : "bg-accent"
+                            }`}
+                          >
                             {invoice.taxType === "CGST_SGST"
                               ? "CGST+SGST"
                               : "IGST"}
@@ -431,7 +441,7 @@ export default function InvoiceListPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1 text-lg font-semibold">
-                          <DollarSign className="h-4 w-4" />₹
+                          <IndianRupee className="h-4 w-4" />₹
                           {invoice.total.toLocaleString()}
                         </div>
                       </div>

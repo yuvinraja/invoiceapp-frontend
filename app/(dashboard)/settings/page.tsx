@@ -1,19 +1,40 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
 
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
-import * as z from "zod"
-import api from "@/lib/axios"
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { Building2, CreditCard, FileText, Settings, Save, Loader2 } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import * as z from "zod";
+import api from "@/lib/axios";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import {
+  Building2,
+  CreditCard,
+  FileText,
+  Settings,
+  Save,
+  Loader2,
+} from "lucide-react";
 
 const companySchema = z.object({
   name: z.string().optional(),
@@ -26,24 +47,24 @@ const companySchema = z.object({
   state: z.string().optional(),
   pincode: z.string().optional(),
   logoUrl: z.string().optional(),
-})
+});
 
 const bankSchema = z.object({
   bankName: z.string().min(1, "Bank name is required"),
   branch: z.string().min(1, "Branch is required"),
   accountNo: z.string().min(1, "Account number is required"),
   ifscCode: z.string().min(1, "IFSC code is required"),
-})
+});
 
 const termsSchema = z.object({
   terms: z.string().optional(),
-})
+});
 
 export default function SettingsPage() {
-  const [loading, setLoading] = useState(true)
-  const [companyLoading, setCompanyLoading] = useState(false)
-  const [bankLoading, setBankLoading] = useState(false)
-  const [termsLoading, setTermsLoading] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [companyLoading, setCompanyLoading] = useState(false);
+  const [bankLoading, setBankLoading] = useState(false);
+  const [termsLoading, setTermsLoading] = useState(false);
 
   const companyForm = useForm({
     resolver: zodResolver(companySchema),
@@ -59,7 +80,7 @@ export default function SettingsPage() {
       pincode: "",
       logoUrl: "",
     },
-  })
+  });
 
   const bankForm = useForm({
     resolver: zodResolver(bankSchema),
@@ -69,20 +90,20 @@ export default function SettingsPage() {
       accountNo: "",
       ifscCode: "",
     },
-  })
+  });
 
   const termsForm = useForm({
     resolver: zodResolver(termsSchema),
     defaultValues: {
       terms: "",
     },
-  })
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await api.get("/user/me")
-        const user = res.data.user
+        const res = await api.get("/user/me");
+        const user = res.data.user;
 
         // Ensure all values are strings, not null
         companyForm.reset({
@@ -96,7 +117,7 @@ export default function SettingsPage() {
           state: user.state || "",
           pincode: user.pincode || "",
           logoUrl: user.logoUrl || "",
-        })
+        });
 
         if (user.bankDetail) {
           bankForm.reset({
@@ -104,60 +125,60 @@ export default function SettingsPage() {
             branch: user.bankDetail.branch || "",
             accountNo: user.bankDetail.accountNo || "",
             ifscCode: user.bankDetail.ifscCode || "",
-          })
+          });
         }
 
         if (user.settings) {
           termsForm.reset({
             terms: user.settings.terms || "",
-          })
+          });
         }
       } catch (err) {
-        toast.error("Failed to load user settings.")
-        console.error("Settings fetch error:", err)
+        toast.error("Failed to load user settings.");
+        // console.error("Settings fetch error:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUser()
-  }, [bankForm, companyForm, termsForm])
+    fetchUser();
+  }, [bankForm, companyForm, termsForm]);
 
   const handleCompanySubmit = async (data: z.infer<typeof companySchema>) => {
-    setCompanyLoading(true)
+    setCompanyLoading(true);
     try {
-      await api.patch("/user/me", data)
-      toast.success("Company information updated successfully")
+      await api.patch("/user/me", data);
+      toast.success("Company information updated successfully");
     } catch {
-      toast.error("Failed to update company information")
+      toast.error("Failed to update company information");
     } finally {
-      setCompanyLoading(false)
+      setCompanyLoading(false);
     }
-  }
+  };
 
   const handleBankSubmit = async (data: z.infer<typeof bankSchema>) => {
-    setBankLoading(true)
+    setBankLoading(true);
     try {
-      await api.patch("/user/me/bank", data)
-      toast.success("Bank details updated successfully")
+      await api.patch("/user/me/bank", data);
+      toast.success("Bank details updated successfully");
     } catch {
-      toast.error("Failed to update bank details")
+      toast.error("Failed to update bank details");
     } finally {
-      setBankLoading(false)
+      setBankLoading(false);
     }
-  }
+  };
 
   const handleTermsSubmit = async (data: z.infer<typeof termsSchema>) => {
-    setTermsLoading(true)
+    setTermsLoading(true);
     try {
-      await api.patch("/user/me/settings", data)
-      toast.success("Terms & conditions updated successfully")
+      await api.patch("/user/me/settings", data);
+      toast.success("Terms & conditions updated successfully");
     } catch {
-      toast.error("Failed to update terms & conditions")
+      toast.error("Failed to update terms & conditions");
     } finally {
-      setTermsLoading(false)
+      setTermsLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -189,7 +210,7 @@ export default function SettingsPage() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -218,20 +239,31 @@ export default function SettingsPage() {
               </div>
               Company Information
             </CardTitle>
-            <CardDescription>Update your business details that appear on invoices</CardDescription>
+            <CardDescription>
+              Update your business details that appear on invoices
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...companyForm}>
-              <form onSubmit={companyForm.handleSubmit(handleCompanySubmit)} className="space-y-6">
+              <form
+                onSubmit={companyForm.handleSubmit(handleCompanySubmit)}
+                className="space-y-6"
+              >
                 <div className="grid gap-6 md:grid-cols-2">
                   <FormField
                     name="company"
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Company Name *</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Company Name *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter company name" className="h-11" {...field} />
+                          <Input
+                            placeholder="Enter company name"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -243,9 +275,15 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">GSTIN</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          GSTIN
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="22AAAAA0000A1Z5" className="h-11" {...field} />
+                          <Input
+                            placeholder="22AAAAA0000A1Z5"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -257,9 +295,15 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Phone Number</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Phone Number
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="+91 12345 67890" className="h-11" {...field} />
+                          <Input
+                            placeholder="+91 12345 67890"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -271,9 +315,15 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Mobile Number</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Mobile Number
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="+91 98765 43210" className="h-11" {...field} />
+                          <Input
+                            placeholder="+91 98765 43210"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -285,7 +335,9 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel className="text-sm font-medium">Address</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Address
+                        </FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Enter complete business address"
@@ -303,9 +355,15 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">City</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          City
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Mumbai" className="h-11" {...field} />
+                          <Input
+                            placeholder="Mumbai"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -317,9 +375,15 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">State</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          State
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Maharashtra" className="h-11" {...field} />
+                          <Input
+                            placeholder="Maharashtra"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -331,9 +395,15 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Pincode</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Pincode
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="400001" className="h-11" {...field} />
+                          <Input
+                            placeholder="400001"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -345,9 +415,15 @@ export default function SettingsPage() {
                     control={companyForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Company Logo URL</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Company Logo URL
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="https://example.com/logo.png" className="h-11" {...field} />
+                          <Input
+                            placeholder="https://example.com/logo.png"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -355,7 +431,11 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <Button type="submit" disabled={companyLoading} className="min-w-[150px]">
+                <Button
+                  type="submit"
+                  disabled={companyLoading}
+                  className="min-w-[150px]"
+                >
                   {companyLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -382,20 +462,31 @@ export default function SettingsPage() {
               </div>
               Banking Information
             </CardTitle>
-            <CardDescription>Bank details for payment instructions on invoices</CardDescription>
+            <CardDescription>
+              Bank details for payment instructions on invoices
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...bankForm}>
-              <form onSubmit={bankForm.handleSubmit(handleBankSubmit)} className="space-y-6">
+              <form
+                onSubmit={bankForm.handleSubmit(handleBankSubmit)}
+                className="space-y-6"
+              >
                 <div className="grid gap-6 md:grid-cols-2">
                   <FormField
                     name="bankName"
                     control={bankForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Bank Name *</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Bank Name *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="State Bank of India" className="h-11" {...field} />
+                          <Input
+                            placeholder="State Bank of India"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -407,9 +498,15 @@ export default function SettingsPage() {
                     control={bankForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Branch *</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Branch *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="Mumbai Main Branch" className="h-11" {...field} />
+                          <Input
+                            placeholder="Mumbai Main Branch"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -421,9 +518,15 @@ export default function SettingsPage() {
                     control={bankForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Account Number *</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Account Number *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="1234567890" className="h-11" {...field} />
+                          <Input
+                            placeholder="1234567890"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -435,9 +538,15 @@ export default function SettingsPage() {
                     control={bankForm.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">IFSC Code *</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          IFSC Code *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder="SBIN0000123" className="h-11" {...field} />
+                          <Input
+                            placeholder="SBIN0000123"
+                            className="h-11"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -445,7 +554,11 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <Button type="submit" disabled={bankLoading} className="min-w-[150px]">
+                <Button
+                  type="submit"
+                  disabled={bankLoading}
+                  className="min-w-[150px]"
+                >
                   {bankLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -472,17 +585,24 @@ export default function SettingsPage() {
               </div>
               Default Terms & Conditions
             </CardTitle>
-            <CardDescription>Set default terms and conditions for all your invoices</CardDescription>
+            <CardDescription>
+              Set default terms and conditions for all your invoices
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...termsForm}>
-              <form onSubmit={termsForm.handleSubmit(handleTermsSubmit)} className="space-y-6">
+              <form
+                onSubmit={termsForm.handleSubmit(handleTermsSubmit)}
+                className="space-y-6"
+              >
                 <FormField
                   name="terms"
                   control={termsForm.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Terms & Conditions</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Terms & Conditions
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Payment due within 30 days. Late payments may incur additional charges..."
@@ -495,7 +615,11 @@ export default function SettingsPage() {
                   )}
                 />
 
-                <Button type="submit" disabled={termsLoading} className="min-w-[150px]">
+                <Button
+                  type="submit"
+                  disabled={termsLoading}
+                  className="min-w-[150px]"
+                >
                   {termsLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -514,5 +638,5 @@ export default function SettingsPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

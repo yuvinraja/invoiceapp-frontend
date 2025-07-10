@@ -13,17 +13,33 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  Legend,
+
 } from "recharts";
-import { FileText, DollarSign, TrendingUp, Users } from "lucide-react";
+
+import { FileText, IndianRupee, TrendingUp, Users } from "lucide-react";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 
+
+// Interface for what your API actually returns
+interface ApiResponse {
+  totalInvoices: number;
+  totalRevenue: number;
+  averageInvoiceValue: number;
+  byInvoiceType: {
+    [key: string]: number;
+  };
+  byTaxType: {
+    [key: string]: number;
+  };
+}
+
+// Interface for what your component uses (transformed data)
 interface DashboardStats {
   totalInvoices: number;
   totalRevenue: number;
@@ -37,7 +53,12 @@ interface DashboardStats {
   }>;
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+const CHART_COLORS = [
+  "var(--chart-1, #0088FE)",
+  "var(--chart-2, #00C49F)",
+  "var(--chart-3, #FFBB28)",
+  "var(--chart-4, #FF8042)",
+];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -54,10 +75,34 @@ export default function DashboardPage() {
         api.get("/stats/topclients"),
       ]);
 
-      setStats({
-        ...summaryResponse.data,
-        topClients: topClientsResponse.data,
-      });
+      const summaryData: ApiResponse = summaryResponse.data;
+
+      // Transform the data to match what your charts expect
+      const transformedStats: DashboardStats = {
+        totalInvoices: summaryData.totalInvoices,
+        totalRevenue: summaryData.totalRevenue,
+        averageInvoiceValue: summaryData.averageInvoiceValue,
+
+        // Transform byInvoiceType object to array format
+        invoicesByType: Object.entries(summaryData.byInvoiceType || {}).map(
+          ([type, count]) => ({
+            type,
+            count,
+          })
+        ),
+
+        // Transform byTaxType object to array format
+        invoicesByTaxType: Object.entries(summaryData.byTaxType || {}).map(
+          ([taxType, count]) => ({
+            taxType: taxType.replace("_", "+"), // Convert CGST_SGST to CGST+SGST
+            count,
+          })
+        ),
+
+        topClients: topClientsResponse.data || [],
+      };
+      
+      setStats(transformedStats);
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
       toast.error("Failed to fetch dashboard stats");
@@ -118,7 +163,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -139,7 +184,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ₹{(stats.averageInvoiceValue || 0).toLocaleString()}
+              ₹{Math.round(stats.averageInvoiceValue || 0).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">Per invoice average</p>
           </CardContent>
@@ -161,6 +206,7 @@ export default function DashboardPage() {
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Invoice Types Bar Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Invoice Types</CardTitle>
@@ -169,48 +215,58 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats.invoicesByType || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="type" />
-                <YAxis />
+            <div className="w-full h-72 flex items-center justify-center">
+              <BarChart
+                data={stats.invoicesByType || []}
+                width={400}
+                height={250}
+                className="w-full"
+              >
+                <XAxis dataKey="type" stroke="var(--muted-foreground, #888)" />
+                <YAxis stroke="var(--muted-foreground, #888)" />
                 <Tooltip />
-                <Bar dataKey="count" fill="#8884d8" />
+                <Bar
+                  dataKey="count"
+                  fill="var(--chart-1, #0088FE)"
+                  radius={[6, 6, 0, 0]}
+                  barSize={40}
+                />
               </BarChart>
-            </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
+        {/* Tax Types Pie Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Tax Types</CardTitle>
             <CardDescription>CGST+SGST vs IGST distribution</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+            <div className="w-full h-72 flex items-center justify-center">
+              <PieChart width={400} height={250} className="w-full">
                 <Pie
                   data={stats.invoicesByTaxType || []}
+                  dataKey="count"
+                  nameKey="taxType"
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ taxType, percent }) =>
-                    `${taxType} ${percent ? (percent * 100).toFixed(0) : 0}%`
-                  }
                   outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
+                  label={({percent }) =>
+                    `${(percent * 100).toFixed(0)}%`
+                  }
                 >
-                  {(stats.invoicesByTaxType || []).map((entry, index) => (
+                  {(stats.invoicesByTaxType || []).map((entry, idx) => (
                     <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      key={`cell-${idx}`}
+                      fill={CHART_COLORS[idx % CHART_COLORS.length]}
                     />
                   ))}
                 </Pie>
                 <Tooltip />
+                <Legend />
               </PieChart>
-            </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
