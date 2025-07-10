@@ -1,6 +1,6 @@
 import InvoiceViewerPage from "@/components/invoice-viewer";
 
-interface PageProps {
+type PageProps = {
   params: {
     id: string;
   };
