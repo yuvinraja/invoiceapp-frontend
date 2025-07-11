@@ -227,33 +227,6 @@ interface Invoice {
 }
 ```
 
-## 📈 Project Status
-
-- ✅ **Core Features**: Complete invoice management system
-- ✅ **GST Compliance**: Full tax calculation and formatting
-- ✅ **PDF Generation**: Professional document export
-- ✅ **Analytics Dashboard**: Business intelligence features
-- ✅ **Responsive Design**: Mobile and desktop optimized
-- 🔄 **In Progress**: Advanced reporting features
-- 📋 **Planned**: Multi-company support and API integrations
-
-## 🤝 Contributing
-
-This project demonstrates enterprise-level development practices and welcomes contributions from developers interested in:
-
-- **Frontend Architecture**: Advanced React patterns and Next.js features
-- **TypeScript Best Practices**: Type-safe development methodologies
-- **UI/UX Improvements**: Enhanced user experience and accessibility
-- **Performance Optimization**: Bundle size and runtime optimizations
-- **Testing Implementation**: Unit and integration testing strategies
-
-### Development Guidelines
-1. Follow existing code patterns and TypeScript conventions
-2. Ensure all new features include proper type definitions
-3. Maintain responsive design principles
-4. Update documentation for new features
-5. Follow semantic commit message conventions
-
 ## 📞 Contact & Portfolio
 
 **Yuvin Raja**
