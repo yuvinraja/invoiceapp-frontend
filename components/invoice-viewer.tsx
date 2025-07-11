@@ -25,7 +25,7 @@ import {
   Edit,
   Calendar,
   User,
-  DollarSign,
+  IndianRupee,
   Hash,
 } from "lucide-react";
 import Link from "next/link";
@@ -268,7 +268,7 @@ export default function InvoiceViewerPage({
                   Total Amount
                 </CardTitle>
                 <div className="p-2 bg-muted rounded-lg">
-                  <DollarSign className="h-4 w-4" />
+                  <IndianRupee className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>

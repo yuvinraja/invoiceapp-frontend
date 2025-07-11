@@ -286,23 +286,18 @@ export const InvoicePDF = ({ data }: Props) => {
               {invoiceClient.pincode}
             </Text>
             <Text>Client GSTIN: {invoiceClient.gstin || "-"}</Text>
-            {invoiceType === "TAX" &&
-              (shippingName || shippingAddress) && (
-                <View style={{ marginTop: 10 }}>
-                  <Text style={styles.bold}>Consignee - Ship To:</Text>
-                  <Text>
-                    {shippingName || invoiceClient.name}
-                  </Text>
-                  <Text>
-                    {shippingAddress || invoiceClient.address}
-                  </Text>
-                  <Text>
-                    {shippingCity || invoiceClient.city},{" "}
-                    {shippingState || invoiceClient.state} -{" "}
-                    {shippingPincode || invoiceClient.pincode}
-                  </Text>
-                </View>
-              )}
+            {invoiceType === "TAX" && (shippingName || shippingAddress) && (
+              <View style={{ marginTop: 10 }}>
+                <Text style={styles.bold}>Consignee - Ship To:</Text>
+                <Text>{shippingName || invoiceClient.name}</Text>
+                <Text>{shippingAddress || invoiceClient.address}</Text>
+                <Text>
+                  {shippingCity || invoiceClient.city},{" "}
+                  {shippingState || invoiceClient.state} -{" "}
+                  {shippingPincode || invoiceClient.pincode}
+                </Text>
+              </View>
+            )}
           </View>
           <View style={styles.rightColumn}>
             <Text style={styles.bold}>Bank Details</Text>

@@ -35,6 +35,7 @@ import {
   Save,
   Loader2,
 } from "lucide-react";
+import LogoUploadSection from "@/components/logo-upload";
 
 const companySchema = z.object({
   name: z.string().optional(),
@@ -410,24 +411,11 @@ export default function SettingsPage() {
                     )}
                   />
 
-                  <FormField
-                    name="logoUrl"
-                    control={companyForm.control}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Company Logo URL
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="https://example.com/logo.png"
-                            className="h-11"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  <LogoUploadSection
+                    currentLogoUrl={companyForm.watch("logoUrl")}
+                    onLogoUpdate={(logoUrl) => companyForm.setValue("logoUrl", logoUrl)}
+                    showCard={false}
+                    className="md:col-span-2"
                   />
                 </div>
 

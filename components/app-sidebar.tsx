@@ -1,6 +1,17 @@
-"use client"
+"use client";
 
-import { LayoutDashboard, FileText, Settings, LogOut, Building2, Plus, User, Monitor, Moon, Sun } from "lucide-react"
+import {
+  LayoutDashboard,
+  FileText,
+  Settings,
+  LogOut,
+  Building2,
+  Plus,
+  User,
+  Monitor,
+  Moon,
+  Sun,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -12,19 +23,20 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useTheme } from "next-themes"
-import { useAuth } from "@/context/AuthContext"
-import { toast } from "sonner"
-import Link from "next/link"
+} from "@/components/ui/dropdown-menu";
+import { useTheme } from "next-themes";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import Link from "next/link";
+import Image from "next/image";
 
 const mainMenuItems = [
   {
@@ -45,7 +57,7 @@ const mainMenuItems = [
   //   icon: BarChart3,
   //   description: "Reports & insights",
   // },
-]
+];
 
 const secondaryMenuItems = [
   {
@@ -58,33 +70,45 @@ const secondaryMenuItems = [
     url: "/settings",
     icon: Settings,
   },
-]
+];
 
 export function AppSidebar() {
-  const { user, logout } = useAuth()
-  const { setTheme } = useTheme()
+  const { user, logout } = useAuth();
+  const { setTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
-      await logout()
-      toast.success("Logged out successfully")
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      await logout();
+      toast.success("Logged out successfully");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // console.error("Logout error:", error)
-      toast.error("Failed to logout")
+      toast.error("Failed to logout");
     }
-  }
+  };
 
   return (
     <Sidebar className="border-r-2">
       <SidebarHeader className="border-b-2 bg-muted/30">
         <div className="flex items-center gap-3 px-2 py-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground">
-            <Building2 className="h-5 w-5 text-background" />
-          </div>
+          {user?.logoUrl ? (
+            <Image
+              src={user.logoUrl}
+              alt="Logo"
+              className="h-10 w-10 rounded-lg object-cover"
+              width={40}
+              height={40}
+            />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground">
+              <Building2 className="h-5 w-5 text-background" />
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="font-bold text-base truncate">InvoiceGST</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email || "user@example.com"}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user?.email || "user@example.com"}
+            </p>
           </div>
         </div>
       </SidebarHeader>
@@ -120,7 +144,9 @@ export function AppSidebar() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-sm">{item.title}</div>
-                        <div className="text-xs text-muted-foreground truncate">{item.description}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {item.description}
+                        </div>
                       </div>
                     </Link>
                   </SidebarMenuButton>
@@ -149,27 +175,36 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              
+
               {/* Theme Switcher */}
               <SidebarMenuItem>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton className="h-10 px-3 w-full justify-start">
+                    <SidebarMenuButton className="h-10 px-3">
                       <Sun className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
                       <Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-                      <span className="text-sm ml-3">Theme</span>
+                      <span className="text-sm">Theme</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem onClick={() => setTheme("light")} className="flex items-center gap-2">
+                    <DropdownMenuItem
+                      onClick={() => setTheme("light")}
+                      className="flex items-center gap-2"
+                    >
                       <Sun className="h-4 w-4" />
                       Light
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")} className="flex items-center gap-2">
+                    <DropdownMenuItem
+                      onClick={() => setTheme("dark")}
+                      className="flex items-center gap-2"
+                    >
                       <Moon className="h-4 w-4" />
                       Dark
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("system")} className="flex items-center gap-2">
+                    <DropdownMenuItem
+                      onClick={() => setTheme("system")}
+                      className="flex items-center gap-2"
+                    >
                       <Monitor className="h-4 w-4" />
                       System
                     </DropdownMenuItem>
@@ -185,7 +220,11 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="px-2 py-3">
-              <Button variant="outline" className="w-full justify-start h-10 bg-background" onClick={handleLogout}>
+              <Button
+                variant="outline"
+                className="w-full justify-start h-10 bg-background"
+                onClick={handleLogout}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </Button>
@@ -194,5 +233,5 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

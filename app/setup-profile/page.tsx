@@ -1,22 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { profileSchema, type ProfileInput } from "@/lib/validation/profile"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { useAuth } from "@/context/AuthContext"
-import api from "@/lib/axios"
-import Protected from "@/components/auth/Protected"
-import Link from "next/link"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profileSchema, type ProfileInput } from "@/lib/validation/profile";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import api from "@/lib/axios";
+import Protected from "@/components/auth/Protected";
+import Link from "next/link";
 import {
   FileText,
   Building2,
@@ -29,13 +42,14 @@ import {
   CheckCircle,
   User,
   Landmark,
-} from "lucide-react"
-import { toast } from "sonner"
+} from "lucide-react";
+import { toast } from "sonner";
+import LogoUploadSection from "@/components/logo-upload";
 
 export default function SetupProfilePage() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-  const [submitting, setSubmitting] = useState(false)
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
@@ -57,26 +71,26 @@ export default function SetupProfilePage() {
         ifscCode: "",
       },
     },
-  })
+  });
 
   const onSubmit = async (values: ProfileInput) => {
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      await api.post("/user/setup-profile", values)
-      router.push("/invoices/create")
+      await api.post("/user/setup-profile", values);
+      router.push("/invoices/create");
     } catch (err: any) {
       // console.error(err)
-      toast.error(err.response?.data?.message || "Failed to save profile")
+      toast.error(err.response?.data?.message || "Failed to save profile");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (!loading && user?.bankDetail) {
-      router.push("/invoices/create")
+      router.push("/invoices/create");
     }
-  }, [user, loading, router])
+  }, [user, loading, router]);
 
   return (
     <Protected>
@@ -85,7 +99,10 @@ export default function SetupProfilePage() {
         <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <Link
+                href="/"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
                 <FileText className="h-6 w-6" />
                 <span className="text-xl font-bold">InvoiceGST</span>
               </Link>
@@ -113,16 +130,21 @@ export default function SetupProfilePage() {
                   <User className="h-8 w-8" />
                 </div>
               </div>
-              <h1 className="text-4xl font-bold mb-4">Complete Your Business Profile</h1>
+              <h1 className="text-4xl font-bold mb-4">
+                Complete Your Business Profile
+              </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Set up your business information to start creating professional GST-compliant invoices
+                Set up your business information to start creating professional
+                GST-compliant invoices
               </p>
 
               {/* Progress Indicator */}
               <div className="max-w-md mx-auto">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Setup Progress</span>
-                  <span className="text-sm text-muted-foreground">Step 1 of 2</span>
+                  <span className="text-sm text-muted-foreground">
+                    Step 1 of 2
+                  </span>
                 </div>
                 <Progress value={50} className="h-2" />
                 <div className="flex justify-between mt-2 text-xs text-muted-foreground">
@@ -134,7 +156,10 @@ export default function SetupProfilePage() {
 
             {/* Main Form */}
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
                 {/* Company Information */}
                 <Card className="border-2">
                   <CardHeader>
@@ -144,7 +169,9 @@ export default function SetupProfilePage() {
                       </div>
                       Company Information
                     </CardTitle>
-                    <CardDescription>Basic details about your business for invoice generation</CardDescription>
+                    <CardDescription>
+                      Basic details about your business for invoice generation
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
@@ -153,9 +180,15 @@ export default function SetupProfilePage() {
                         name="company"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">Company Name *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              Company Name *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter your company name" className="h-11" {...field} />
+                              <Input
+                                placeholder="Enter your company name"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -167,24 +200,12 @@ export default function SetupProfilePage() {
                         name="gstin"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">GSTIN *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="22AAAAA0000A1Z5" className="h-11" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="logoUrl"
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-2">
-                            <FormLabel className="text-sm font-medium">Company Logo URL</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              GSTIN *
+                            </FormLabel>
                             <FormControl>
                               <Input
-                                placeholder="https://example.com/logo.png (optional)"
+                                placeholder="22AAAAA0000A1Z5"
                                 className="h-11"
                                 {...field}
                               />
@@ -192,6 +213,15 @@ export default function SetupProfilePage() {
                             <FormMessage />
                           </FormItem>
                         )}
+                      />
+
+                      <LogoUploadSection
+                        currentLogoUrl={form.watch("logoUrl")}
+                        onLogoUpdate={(logoUrl) =>
+                          form.setValue("logoUrl", logoUrl)
+                        }
+                        showCard={false}
+                        className="md:col-span-2"
                       />
                     </div>
                   </CardContent>
@@ -206,7 +236,9 @@ export default function SetupProfilePage() {
                       </div>
                       Contact Information
                     </CardTitle>
-                    <CardDescription>Contact details that will appear on your invoices</CardDescription>
+                    <CardDescription>
+                      Contact details that will appear on your invoices
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
@@ -215,9 +247,15 @@ export default function SetupProfilePage() {
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">Phone Number</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              Phone Number
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="+91 12345 67890" className="h-11" {...field} />
+                              <Input
+                                placeholder="+91 12345 67890"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -229,9 +267,15 @@ export default function SetupProfilePage() {
                         name="mobile"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">Mobile Number</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              Mobile Number
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="+91 98765 43210" className="h-11" {...field} />
+                              <Input
+                                placeholder="+91 98765 43210"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -250,7 +294,9 @@ export default function SetupProfilePage() {
                       </div>
                       Business Address
                     </CardTitle>
-                    <CardDescription>Your business address for GST compliance and invoicing</CardDescription>
+                    <CardDescription>
+                      Your business address for GST compliance and invoicing
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <FormField
@@ -258,7 +304,9 @@ export default function SetupProfilePage() {
                       name="address"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Street Address *</FormLabel>
+                          <FormLabel className="text-sm font-medium">
+                            Street Address *
+                          </FormLabel>
                           <FormControl>
                             <Textarea
                               placeholder="Enter your complete business address"
@@ -277,9 +325,15 @@ export default function SetupProfilePage() {
                         name="city"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">City *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              City *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="Mumbai" className="h-11" {...field} />
+                              <Input
+                                placeholder="Mumbai"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -291,9 +345,15 @@ export default function SetupProfilePage() {
                         name="state"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">State *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              State *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="Maharashtra" className="h-11" {...field} />
+                              <Input
+                                placeholder="Maharashtra"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -305,9 +365,15 @@ export default function SetupProfilePage() {
                         name="pincode"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">Pincode *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              Pincode *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="400001" className="h-11" {...field} />
+                              <Input
+                                placeholder="400001"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -326,7 +392,9 @@ export default function SetupProfilePage() {
                       </div>
                       Banking Information
                     </CardTitle>
-                    <CardDescription>Bank details for payment instructions on invoices</CardDescription>
+                    <CardDescription>
+                      Bank details for payment instructions on invoices
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
@@ -335,9 +403,15 @@ export default function SetupProfilePage() {
                         name="bank.bankName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">Bank Name *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              Bank Name *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="State Bank of India" className="h-11" {...field} />
+                              <Input
+                                placeholder="State Bank of India"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -349,9 +423,15 @@ export default function SetupProfilePage() {
                         name="bank.branch"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">Branch *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              Branch *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="Mumbai Main Branch" className="h-11" {...field} />
+                              <Input
+                                placeholder="Mumbai Main Branch"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -363,9 +443,15 @@ export default function SetupProfilePage() {
                         name="bank.accountNo"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">Account Number *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              Account Number *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="1234567890" className="h-11" {...field} />
+                              <Input
+                                placeholder="1234567890"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -377,9 +463,15 @@ export default function SetupProfilePage() {
                         name="bank.ifscCode"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-medium">IFSC Code *</FormLabel>
+                            <FormLabel className="text-sm font-medium">
+                              IFSC Code *
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="SBIN0000123" className="h-11" {...field} />
+                              <Input
+                                placeholder="SBIN0000123"
+                                className="h-11"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -398,7 +490,9 @@ export default function SetupProfilePage() {
                       </div>
                       Terms & Conditions
                     </CardTitle>
-                    <CardDescription>Default terms and conditions for your invoices (optional)</CardDescription>
+                    <CardDescription>
+                      Default terms and conditions for your invoices (optional)
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <FormField
@@ -406,7 +500,9 @@ export default function SetupProfilePage() {
                       name="terms"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-medium">Terms & Conditions</FormLabel>
+                          <FormLabel className="text-sm font-medium">
+                            Terms & Conditions
+                          </FormLabel>
                           <FormControl>
                             <Textarea
                               placeholder="Payment due within 30 days. Late payments may incur additional charges..."
@@ -430,7 +526,12 @@ export default function SetupProfilePage() {
                     </Link>
                   </Button>
 
-                  <Button type="submit" size="lg" className="min-w-[200px]" disabled={submitting}>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="min-w-[200px]"
+                    disabled={submitting}
+                  >
                     {submitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -454,7 +555,8 @@ export default function SetupProfilePage() {
                   <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Need Help?</h3>
                   <p className="text-muted-foreground mb-4">
-                    Our setup wizard will guide you through creating your first GST-compliant invoice
+                    Our setup wizard will guide you through creating your first
+                    GST-compliant invoice
                   </p>
                   <div className="flex justify-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center">
@@ -477,5 +579,5 @@ export default function SetupProfilePage() {
         </div>
       </div>
     </Protected>
-  )
+  );
 }
