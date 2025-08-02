@@ -290,15 +290,10 @@ export default function CreateInvoicePage() {
                             </FormLabel>
                             <FormControl>
                               <Input
-                                type="number"
+                                type="text"
                                 placeholder="Enter invoice number"
                                 className="h-11"
                                 {...field}
-                                onChange={(e) =>
-                                  field.onChange(
-                                    Number.parseInt(e.target.value)
-                                  )
-                                }
                               />
                             </FormControl>
                             <FormMessage />

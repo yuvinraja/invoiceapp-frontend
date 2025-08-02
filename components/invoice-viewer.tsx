@@ -177,7 +177,7 @@ export default function InvoiceViewerPage({
               <div className="h-6 w-px bg-border" />
               <div>
                 <h1 className="text-2xl font-bold">
-                  Invoice #{invoice.invoiceNumber}
+                Invoice #{invoice.invoiceNumber}
                 </h1>
                 <p className="text-muted-foreground">
                   {invoice.client?.name} •{" "}

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const invoiceSchema = z.object({
-  invoiceNumber: z.number().min(1).optional(),
+  invoiceNumber: z.string().min(1).optional(),
   invoiceType: z.enum(["TAX", "PROFORMA"]),
   taxType: z.enum(["CGST_SGST", "IGST"]),
   invoiceDate: z.string().min(1),

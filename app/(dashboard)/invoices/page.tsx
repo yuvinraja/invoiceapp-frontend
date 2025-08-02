@@ -144,7 +144,7 @@ export default function InvoiceListPage() {
       filtered = filtered.filter(
         (invoice) =>
           invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          invoice.invoiceNumber.toString().includes(searchTerm)
+          invoice.invoiceNumber.includes(searchTerm)
       );
     }
 

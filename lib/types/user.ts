@@ -62,7 +62,7 @@ export type Invoice = {
   userId: string;
   clientId?: string;
 
-  invoiceNumber: number;
+  invoiceNumber: string;
   invoiceType: InvoiceType;
   taxType: TaxType;
   taxRate: number;
