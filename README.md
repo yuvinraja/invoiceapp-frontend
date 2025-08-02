@@ -4,7 +4,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-61DAFB?style=flat-square&logo=react)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 > A comprehensive, enterprise-grade GST invoice management platform built with modern web technologies, designed to streamline business operations and ensure complete GST compliance.
 
@@ -228,62 +227,9 @@ interface Invoice {
 }
 ```
 
-## 📈 Project Status
-
-- ✅ **Core Features**: Complete invoice management system
-- ✅ **GST Compliance**: Full tax calculation and formatting
-- ✅ **PDF Generation**: Professional document export
-- ✅ **Analytics Dashboard**: Business intelligence features
-- ✅ **Responsive Design**: Mobile and desktop optimized
-- 🔄 **In Progress**: Advanced reporting features
-- 📋 **Planned**: Multi-company support and API integrations
-
-## 🤝 Contributing
-
-This project demonstrates enterprise-level development practices and welcomes contributions from developers interested in:
-
-- **Frontend Architecture**: Advanced React patterns and Next.js features
-- **TypeScript Best Practices**: Type-safe development methodologies
-- **UI/UX Improvements**: Enhanced user experience and accessibility
-- **Performance Optimization**: Bundle size and runtime optimizations
-- **Testing Implementation**: Unit and integration testing strategies
-
-### Development Guidelines
-1. Follow existing code patterns and TypeScript conventions
-2. Ensure all new features include proper type definitions
-3. Maintain responsive design principles
-4. Update documentation for new features
-5. Follow semantic commit message conventions
-
 ## 📞 Contact & Portfolio
 
 **Yuvin Raja**
 - **GitHub**: [@yuvinraja](https://github.com/yuvinraja)
 - **LinkedIn**: [Connect with me](https://linkedin.com/in/yuvinraja)
-- **Portfolio**: [View my work](https://yuvinraja.dev)
-
-## 🎯 Hiring Manager Highlights
-
-This project demonstrates expertise in:
-
-### **Technical Proficiency**
-- **Modern React Development**: Latest React 19 features and patterns
-- **TypeScript Mastery**: Comprehensive type safety and advanced patterns
-- **Next.js Expertise**: App Router, SSR, and performance optimization
-- **State Management**: Context API and complex state interactions
-
-### **Enterprise Development Skills**
-- **Scalable Architecture**: Modular component design and clean code principles
-- **Performance Optimization**: Bundle optimization and runtime efficiency
-- **Security Implementation**: Authentication, authorization, and data validation
-- **Testing Mindset**: Validation schemas and error handling patterns
-
-### **Business Acumen**
-- **Domain Knowledge**: Understanding of GST regulations and business processes
-- **User Experience**: Intuitive interface design and accessibility considerations
-- **Problem Solving**: Complex tax calculations and document generation
-- **Production Ready**: Complete application with real-world applicability
-
----
-
-*This project represents a production-ready application showcasing modern web development practices, enterprise-level architecture, and business domain expertise in the Indian GST ecosystem.*
+- **Portfolio**: [View my work](https://yuvinraja.vercel.app)
