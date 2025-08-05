@@ -1,12 +1,12 @@
-import InvoiceViewerPage from "@/components/invoice-viewer";
+import InvoiceViewerPage from '@/components/invoice-viewer';
 
 type PageProps = {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
+  };
 };
 
-export default async function Page({ params }: PageProps) {
-  const { id } = await params;
+export default function Page({ params }: PageProps) {
+  const { id } = params;
   return <InvoiceViewerPage invoiceId={id} />;
 }

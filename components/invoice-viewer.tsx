@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+
+// UI Components
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
-import { InvoicePDF } from "@/components/invoice/InvoicePDF";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Icons
 import {
   ArrowLeft,
   Download,
@@ -27,12 +29,24 @@ import {
   User,
   IndianRupee,
   Hash,
-} from "lucide-react";
-import Link from "next/link";
-import api from "@/lib/axios";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import type { Invoice } from "@/lib/types/user";
+} from 'lucide-react';
+
+// PDF Rendering
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import { InvoicePDF } from '@/components/invoice/InvoicePDF';
+import InvoicePDF2 from '@/components/invoice/InvoicePDF2';
+
+// Utilities
+import api from '@/lib/axios';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+
+// Types
+import type { Invoice } from '@/lib/types/user';
+
+// Other Components
+import { TemplateSelector } from '@/components/template-selector';
+import Link from 'next/link';
 
 interface InvoiceViewerPageProps {
   invoiceId: string;
@@ -43,7 +57,7 @@ export default function InvoiceViewerPage({
 }: InvoiceViewerPageProps) {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(true);
-  // const [pdfLoading, setPdfLoading] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState('template1');
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -51,8 +65,7 @@ export default function InvoiceViewerPage({
         const res = await api.get(`/invoices/${invoiceId}`);
         setInvoice(res.data);
       } catch (err) {
-        // console.error("Error fetching invoice:", err);
-        toast.error("Failed to load invoice");
+        toast.error('Failed to load invoice');
       } finally {
         setLoading(false);
       }
@@ -76,13 +89,11 @@ export default function InvoiceViewerPage({
           url: window.location.href,
         });
       } catch (err) {
-        // console.error("Error sharing:", err);
-        toast.error("Failed to share invoice");
+        toast.error('Failed to share invoice');
       }
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      toast.success("Invoice link copied to clipboard");
+      toast.success('Invoice link copied to clipboard');
     }
   };
 
@@ -177,24 +188,24 @@ export default function InvoiceViewerPage({
               <div className="h-6 w-px bg-border" />
               <div>
                 <h1 className="text-2xl font-bold">
-                Invoice #{invoice.invoiceNumber}
+                  Invoice #{invoice.invoiceNumber}
                 </h1>
                 <p className="text-muted-foreground">
-                  {invoice.client?.name} •{" "}
-                  {format(new Date(invoice.invoiceDate), "MMMM dd, yyyy")}
+                  {invoice.client?.name} •{' '}
+                  {format(new Date(invoice.invoiceDate), 'MMMM dd, yyyy')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Badge
                 variant={
-                  invoice.invoiceType === "TAX" ? "default" : "secondary"
+                  invoice.invoiceType === 'TAX' ? 'default' : 'secondary'
                 }
               >
                 {invoice.invoiceType}
               </Badge>
               <Badge variant="outline">
-                {invoice.taxType === "CGST_SGST" ? "CGST+SGST" : "IGST"}
+                {invoice.taxType === 'CGST_SGST' ? 'CGST+SGST' : 'IGST'}
               </Badge>
             </div>
           </div>
@@ -254,10 +265,10 @@ export default function InvoiceViewerPage({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {format(new Date(invoice.invoiceDate), "dd")}
+                  {format(new Date(invoice.invoiceDate), 'dd')}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(invoice.invoiceDate), "MMM yyyy")}
+                  {format(new Date(invoice.invoiceDate), 'MMM yyyy')}
                 </p>
               </CardContent>
             </Card>
@@ -297,24 +308,47 @@ export default function InvoiceViewerPage({
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
-                <PDFDownloadLink
-                  document={<InvoicePDF data={invoice} />}
-                  fileName={`invoice-${invoice.invoiceNumber}.pdf`}
-                >
-                  {({ loading }) => (
-                    <Button
-                      disabled={loading}
-                      className="flex items-center gap-2"
-                    >
-                      {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Download className="h-4 w-4" />
-                      )}
-                      {loading ? "Preparing PDF..." : "Download PDF"}
-                    </Button>
-                  )}
-                </PDFDownloadLink>
+                {/* Download Button, based on selected template */}
+                {selectedTemplate === 'template1' && (
+                  <PDFDownloadLink
+                    document={<InvoicePDF data={invoice} />}
+                    fileName={`invoice-${invoice.invoiceNumber}.pdf`}
+                  >
+                    {({ loading }) => (
+                      <Button
+                        disabled={loading}
+                        className="flex items-center gap-2"
+                      >
+                        {loading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4" />
+                        )}
+                        {loading ? 'Preparing PDF...' : 'Download PDF'}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                )}
+                {selectedTemplate === 'template2' && (
+                  <PDFDownloadLink
+                    document={<InvoicePDF2 data={invoice} />}
+                    fileName={`invoice-${invoice.invoiceNumber}.pdf`}
+                  >
+                    {({ loading }) => (
+                      <Button
+                        disabled={loading}
+                        className="flex items-center gap-2"
+                      >
+                        {loading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4" />
+                        )}
+                        {loading ? 'Preparing PDF...' : 'Download PDF'}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                )}
 
                 <Button
                   variant="outline"
@@ -348,7 +382,7 @@ export default function InvoiceViewerPage({
             </CardContent>
           </Card>
 
-          {/* PDF Preview */}
+          {/* Invoice Preview & Template Selector */}
           <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -363,16 +397,35 @@ export default function InvoiceViewerPage({
               <CardDescription>
                 Preview of your GST-compliant invoice document
               </CardDescription>
+              {/* Template Selector */}
+              <div className="mt-4">
+                <TemplateSelector
+                  selected={selectedTemplate}
+                  onChange={setSelectedTemplate}
+                />
+              </div>
             </CardHeader>
             <CardContent>
-              <div
-                className="border-2 rounded-lg overflow-hidden bg-muted/20"
-                style={{ height: "80vh" }}
-              >
-                <PDFViewer style={{ width: "100%", height: "100%" }}>
-                  <InvoicePDF data={invoice} />
-                </PDFViewer>
-              </div>
+              {selectedTemplate === 'template1' && (
+                <div
+                  className="border-2 rounded-lg overflow-hidden bg-muted/20"
+                  style={{ height: '80vh' }}
+                >
+                  <PDFViewer style={{ width: '100%', height: '100%' }}>
+                    <InvoicePDF data={invoice} />
+                  </PDFViewer>
+                </div>
+              )}
+              {selectedTemplate === 'template2' && (
+                <div
+                  className="border-2 rounded-lg overflow-hidden bg-muted/20"
+                  style={{ height: '80vh' }}
+                >
+                  <PDFViewer style={{ width: '100%', height: '100%' }}>
+                    <InvoicePDF2 data={invoice} />
+                  </PDFViewer>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

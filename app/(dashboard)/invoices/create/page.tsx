@@ -1,25 +1,37 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+'use client';
 
-import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { invoiceSchema, type InvoiceInput } from "@/lib/validation/invoice";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+// React and State Management
+import { useState, useRef } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+// Validation and Types
+import { invoiceSchema, type InvoiceInput } from '@/lib/validation/invoice';
+import type { Invoice } from '@/lib/types/user';
+
+// API and Utilities
+import api from '@/lib/axios';
+import { getInvoiceById } from '@/lib/invoices';
+import { toast } from 'sonner';
+
+// UI Components
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -27,10 +39,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+
+// My Components
+import ProfileGuard from '@/components/profile-guard';
+import { TemplateSelector } from '@/components/template-selector';
+import { InvoicePDF } from '@/components/invoice/InvoicePDF';
+import { InvoicePDF2 } from '@/components/invoice/InvoicePDF2';
+
+// Icons
 import {
   Trash2,
   Plus,
@@ -44,38 +64,35 @@ import {
   Truck,
   Hash,
   Loader2,
-} from "lucide-react";
-import api from "@/lib/axios";
-import { useState } from "react";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
-import { InvoicePDF } from "@/components/invoice/InvoicePDF";
-import Link from "next/link";
+} from 'lucide-react';
 
-import type { Invoice } from "@/lib/types/user";
-import ProfileGuard from "@/components/profile-guard";
+// PDF and Printing
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 
-import { getInvoiceById } from "@/lib/invoices";
-import { toast } from "sonner";
+// Routing
+import Link from 'next/link';
 
 export default function CreateInvoicePage() {
   const form = useForm<InvoiceInput>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
-      invoiceType: "TAX",
-      taxType: "CGST_SGST",
-      invoiceDate: new Date().toISOString().split("T")[0],
+      invoiceType: 'TAX',
+      taxType: 'CGST_SGST',
+      invoiceDate: new Date().toISOString().split('T')[0],
       taxRate: 18,
-      items: [{ description: "", hsnCode: "", quantity: 1, rate: 0 }],
+      items: [{ description: '', hsnCode: '', quantity: 1, rate: 0 }],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "items",
+    name: 'items',
   });
 
   const [loading, setLoading] = useState(false);
   const [submittedData, setSubmittedData] = useState<Invoice | null>(null);
+
+  const [selectedTemplate, setSelectedTemplate] = useState('template1');
 
   const onSubmit = async (data: InvoiceInput) => {
     setLoading(true);
@@ -90,25 +107,25 @@ export default function CreateInvoicePage() {
         roundedTotal,
       };
 
-      const response = await api.post("/invoices", calculatedData);
+      const response = await api.post('/invoices', calculatedData);
 
       const invoiceId = response.data.invoice.id;
       const fullInvoice = await getInvoiceById(invoiceId);
       setSubmittedData(fullInvoice);
-      toast.success("Invoice created successfully!");
+      toast.success('Invoice created successfully!');
     } catch (err) {
       // console.error(err);
-      toast.error("Failed to create invoice");
+      toast.error('Failed to create invoice');
     } finally {
       setLoading(false);
     }
   };
 
   // Watch form values for calculations
-  const items = form.watch("items") || [];
-  const taxType = form.watch("taxType");
-  const taxRate = form.watch("taxRate") || 18;
-  const invoiceType = form.watch("invoiceType");
+  const items = form.watch('items') || [];
+  const taxType = form.watch('taxType');
+  const taxRate = form.watch('taxRate') || 18;
+  const invoiceType = form.watch('invoiceType');
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => {
@@ -117,9 +134,9 @@ export default function CreateInvoicePage() {
     return sum + quantity * rate;
   }, 0);
 
-  const cgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0;
-  const sgst = taxType === "CGST_SGST" ? (subtotal * taxRate) / 200 : 0;
-  const igst = taxType === "IGST" ? (subtotal * taxRate) / 100 : 0;
+  const cgst = taxType === 'CGST_SGST' ? (subtotal * taxRate) / 200 : 0;
+  const sgst = taxType === 'CGST_SGST' ? (subtotal * taxRate) / 200 : 0;
+  const igst = taxType === 'IGST' ? (subtotal * taxRate) / 100 : 0;
   const total = subtotal + cgst + sgst + igst;
   const roundedTotal = Math.round(total);
 
@@ -317,7 +334,7 @@ export default function CreateInvoicePage() {
                         )}
                       />
 
-                      {invoiceType === "TAX" && (
+                      {invoiceType === 'TAX' && (
                         <>
                           <FormField
                             control={form.control}
@@ -547,7 +564,7 @@ export default function CreateInvoicePage() {
                       />
                     </div>
 
-                    {invoiceType === "TAX" && (
+                    {invoiceType === 'TAX' && (
                       <>
                         <Separator />
                         <div>
@@ -814,8 +831,8 @@ export default function CreateInvoicePage() {
                         variant="outline"
                         onClick={() =>
                           append({
-                            description: "",
-                            hsnCode: "",
+                            description: '',
+                            hsnCode: '',
                             quantity: 1,
                             rate: 0,
                           })
@@ -855,7 +872,7 @@ export default function CreateInvoicePage() {
                             </span>
                           </div>
 
-                          {taxType === "CGST_SGST" ? (
+                          {taxType === 'CGST_SGST' ? (
                             <>
                               <div className="flex justify-between text-base">
                                 <span className="text-muted-foreground">
@@ -944,35 +961,80 @@ export default function CreateInvoicePage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex gap-4">
-                    <PDFDownloadLink
-                      document={<InvoicePDF data={submittedData} />}
-                      fileName={`invoice-${submittedData.invoiceNumber}.pdf`}
-                    >
-                      {({ loading }) => (
-                        <Button
-                          disabled={loading}
-                          className="flex items-center gap-2"
-                        >
-                          {loading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Download className="h-4 w-4" />
-                          )}
-                          {loading ? "Preparing PDF..." : "Download PDF"}
-                        </Button>
-                      )}
-                    </PDFDownloadLink>
-                  </div>
+                  {/* 🔄 Template Selector */}
+                  <TemplateSelector
+                    selected={selectedTemplate}
+                    onChange={setSelectedTemplate}
+                  />
 
-                  <div
-                    className="border-2 rounded-lg overflow-hidden"
-                    style={{ height: "80vh" }}
-                  >
-                    <PDFViewer style={{ width: "100%", height: "100%" }}>
-                      <InvoicePDF data={submittedData} />
-                    </PDFViewer>
-                  </div>
+                  {/* ⬇ Download + Preview Area */}
+                  {selectedTemplate === 'template1' && (
+                    <>
+                      <div className="flex gap-4">
+                        <PDFDownloadLink
+                          document={<InvoicePDF data={submittedData} />}
+                          fileName={`invoice-${submittedData.invoiceNumber}.pdf`}
+                        >
+                          {({ loading }) => (
+                            <Button
+                              disabled={loading}
+                              className="flex items-center gap-2"
+                            >
+                              {loading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Download className="h-4 w-4" />
+                              )}
+                              {loading ? 'Preparing PDF...' : 'Download PDF'}
+                            </Button>
+                          )}
+                        </PDFDownloadLink>
+                      </div>
+
+                      <div
+                        className="border-2 rounded-lg overflow-hidden"
+                        style={{ height: '80vh' }}
+                      >
+                        <PDFViewer style={{ width: '100%', height: '100%' }}>
+                          <InvoicePDF data={submittedData} />
+                        </PDFViewer>
+                      </div>
+                    </>
+                  )}
+
+                  {selectedTemplate === 'template2' && (
+                    <>
+                      <div className="flex gap-4">
+                        <PDFDownloadLink
+                          document={<InvoicePDF2 data={submittedData} />}
+                          fileName={`invoice-${submittedData.invoiceNumber}.pdf`}
+                        >
+                          {({ loading }) => (
+                            <Button
+                              disabled={loading}
+                              className="flex items-center gap-2"
+                            >
+                              {loading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Download className="h-4 w-4" />
+                              )}
+                              {loading ? 'Preparing PDF...' : 'Download PDF'}
+                            </Button>
+                          )}
+                        </PDFDownloadLink>
+                      </div>
+
+                      <div
+                        className="border-2 rounded-lg overflow-hidden"
+                        style={{ height: '80vh' }}
+                      >
+                        <PDFViewer style={{ width: '100%', height: '100%' }}>
+                          <InvoicePDF2 data={submittedData} />
+                        </PDFViewer>
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             )}

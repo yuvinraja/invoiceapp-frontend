@@ -366,8 +366,8 @@ export const InvoicePDF = ({ data }: Props) => {
         <View style={styles.totalsSection}>
           <View style={styles.totalsLeft}>
             <Text style={styles.bold}>Total Invoice Amount (in words):</Text>
-            <Text>{toWords.convert(roundedTotal)} rupees only</Text>
-            <View style={{ marginTop: 15 }}>
+            <Text>{toWords.convert(roundedTotal)}</Text>
+            <View style={{ marginTop: 15 }}> rupees only
               <Text style={styles.bold}>Notes:</Text>
               <Text>Thank you for your business!</Text>
             </View>
